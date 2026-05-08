@@ -1,0 +1,169 @@
+/* ── DashboardPage ─────────────────────────────────── */
+.db-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #0a0a0a;
+  color: #e5e5e5;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Topbar */
+.db-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.75rem;
+  border-bottom: 1px solid #1a1a1a;
+  background: #0d0d0d;
+}
+.db-topbar-left { display: flex; align-items: center; gap: 1rem; }
+.db-topbar-title { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; color: #ccc; }
+.db-topbar-session { font-size: 0.65rem; color: #444; letter-spacing: 0.08em; }
+.db-topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+.db-streak-badge {
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #fdab43;
+  background: #1a1200;
+  border: 1px solid #2a1f00;
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+}
+.db-icon-btn { font-size: 0.9rem; color: #444; background: none; border: none; cursor: pointer; padding: 0.2rem; }
+.db-icon-btn:hover { color: #888; }
+
+/* Content */
+.db-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; flex: 1; }
+
+/* KPI row */
+.db-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.db-kpi-card {
+  background: #111;
+  border: 1px solid #1a1a1a;
+  border-radius: 0.5rem;
+  padding: 1.1rem 1.25rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.db-kpi-header { display: flex; align-items: center; justify-content: space-between; }
+.db-kpi-label { font-size: 0.6rem; color: #555; letter-spacing: 0.1em; font-weight: 600; }
+.db-kpi-icon { font-size: 0.85rem; color: #333; }
+.db-kpi-val {
+  font-size: 1.8rem; font-weight: 700; color: #ddd;
+  font-variant-numeric: tabular-nums;
+  display: flex; align-items: baseline; gap: 0.35rem;
+}
+.db-kpi-sub { font-size: 0.65rem; color: #6daa45; font-weight: 600; }
+
+/* Main row */
+.db-main-row { display: grid; grid-template-columns: 1fr 280px; gap: 1rem; }
+
+/* Chart card */
+.db-chart-card {
+  background: #111;
+  border: 1px solid #1a1a1a;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+}
+.db-chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+.db-chart-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; color: #bbb; }
+.db-chart-sub   { font-size: 0.55rem; color: #444; letter-spacing: 0.1em; margin-top: 0.2rem; }
+.db-chart-tabs  { display: flex; gap: 0.3rem; }
+.db-tab {
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em;
+  padding: 0.25rem 0.6rem; border-radius: 4px;
+  border: 1px solid #2a2a2a; background: transparent; color: #555; cursor: pointer;
+  transition: all 160ms;
+}
+.db-tab.active { background: #1a1a2e; border-color: #3a2a6e; color: #a78bfa; }
+.db-tab:hover:not(.active) { color: #888; border-color: #333; }
+
+/* Tooltip */
+.db-tooltip { background: #1c1b19; border: 1px solid #333; border-radius: 6px; padding: 0.4rem 0.7rem; }
+.db-tooltip-label { font-size: 0.6rem; color: #777; margin-bottom: 0.2rem; }
+.db-tooltip-value { font-size: 0.85rem; font-weight: 600; color: #a78bfa; }
+
+/* Timer card */
+.db-timer-card {
+  background: #111;
+  border: 1px solid #1a1a1a;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+}
+.db-timer-header { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+.db-timer-title { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; color: #888; }
+.db-timer-settings { font-size: 0.85rem; color: #444; cursor: pointer; }
+.db-timer-ring { width: 140px; }
+.db-ring-svg { width: 100%; height: auto; }
+.db-focus-btn {
+  width: 100%;
+  padding: 0.65rem;
+  background: #1a1a2e;
+  border: 1px solid #3a2a6e;
+  border-radius: 0.375rem;
+  color: #c4b5fd;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: all 160ms;
+}
+.db-focus-btn:hover { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+.db-timer-meta {
+  width: 100%; display: flex; justify-content: space-between;
+  font-size: 0.58rem; color: #444; letter-spacing: 0.05em;
+}
+
+/* Curriculum */
+.db-curriculum-section { display: flex; flex-direction: column; gap: 0.9rem; }
+.db-curriculum-header { display: flex; justify-content: space-between; align-items: flex-end; }
+.db-curriculum-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; color: #ccc; }
+.db-curriculum-sub   { font-size: 0.6rem; color: #444; margin-top: 0.15rem; }
+.db-view-registry {
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em;
+  color: #7c3aed; background: none; border: none; cursor: pointer;
+}
+.db-view-registry:hover { color: #a78bfa; }
+.db-curriculum-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.9rem; }
+.db-curr-card {
+  background: #111;
+  border: 1px solid #1a1a1a;
+  border-radius: 0.5rem;
+  padding: 1.1rem;
+  display: flex; flex-direction: column; gap: 0.55rem;
+  transition: border-color 160ms;
+}
+.db-curr-card:hover { border-color: #2a2a2a; }
+.db-curr-top { display: flex; justify-content: space-between; align-items: center; }
+.db-curr-code { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; color: #7c3aed; }
+.db-curr-icon { font-size: 0.85rem; color: #333; }
+.db-curr-name { font-size: 0.78rem; font-weight: 600; color: #ccc; }
+.db-curr-efficiency-row { display: flex; justify-content: space-between; align-items: center; }
+.db-curr-eff-label { font-size: 0.58rem; color: #555; letter-spacing: 0.08em; }
+.db-curr-eff-val   { font-size: 0.7rem; font-weight: 700; color: #bbb; font-variant-numeric: tabular-nums; }
+.db-progress-track {
+  height: 3px; background: #1f1f1f; border-radius: 2px; overflow: hidden;
+}
+.db-progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+.db-curr-topic { font-size: 0.6rem; color: #555; line-height: 1.5; }
+
+/* Footer */
+.db-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 1.75rem;
+  border-top: 1px solid #1a1a1a;
+  margin-top: auto;
+}
+.db-footer-brand { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; color: #333; }
+.db-footer-links { display: flex; gap: 1.5rem; }
+.db-footer-links a { font-size: 0.55rem; color: #333; letter-spacing: 0.1em; text-decoration: none; }
+.db-footer-links a:hover { color: #666; }
+.db-footer-ver { font-size: 0.55rem; color: #2a2a2a; letter-spacing: 0.08em; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .db-kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .db-main-row { grid-template-columns: 1fr; }
+  .db-curriculum-grid { grid-template-columns: 1fr; }
+}
