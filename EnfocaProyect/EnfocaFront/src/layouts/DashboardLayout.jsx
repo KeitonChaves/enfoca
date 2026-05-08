@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthProvider';
 
 const NavItem = ({ to, icon, label }) => (
@@ -18,10 +18,9 @@ const NavItem = ({ to, icon, label }) => (
     </NavLink>
 );
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = () => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
-    const [menuOpen, setMenuOpen] = useState(false);
 
     const handleLogout = () => {
         logout();
@@ -92,9 +91,9 @@ const DashboardLayout = ({ children }) => {
                 </div>
             </aside>
 
-            {/* Contenido principal */}
+            {/* Contenido — Outlet renderiza la página hija */}
             <main className="flex-1 overflow-y-auto">
-                {children}
+                <Outlet />
             </main>
         </div>
     );
