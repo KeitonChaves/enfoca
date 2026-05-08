@@ -1,203 +1,278 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useContext, useState, useEffect, useRef } from 'react';
+import { AuthContext } from '../contexts/AuthProvider';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer
+    AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
-import './DashboardPage.css';
 
-/* ── Mock data ── */
-const WEEKLY_RAW = [
-  { day: 'MON', cycles: 3 }, { day: 'TUE', cycles: 5 },
-  { day: 'WED', cycles: 8 }, { day: 'THU', cycles: 4 },
-  { day: 'FRI', cycles: 6 }, { day: 'SAT', cycles: 2 },
-  { day: 'SUN', cycles: 1 },
-];
-const WEEKLY_AVG = WEEKLY_RAW.map(d => ({ ...d, cycles: +(d.cycles * 0.7).toFixed(1) }));
-
-const CURRICULUM = [
-  { code: 'MTH-402', name: 'Multivariable Integration', icon: '∑', pct: 75.0, color: '#5591c7', topic: 'Topic: Triple integrals in spherical coordinates and vector fields.' },
-  { code: 'BIO-612', name: 'CRISPR Gene Editing',        icon: '⬆', pct: 42.8, color: '#6daa45', topic: 'Topic: Analysis of CAS9 molecular sequencing and target binding.' },
-  { code: 'HIS-101', name: 'Industrial Revolution',      icon: '📋', pct: 88.2, color: '#fdab43', topic: 'Topic: Socioeconomic shift and mechanization in 19th-century Europe.' },
+// --- Datos mock (se reemplazarán con llamadas al backend) ---
+const weeklyData = [
+    { day: 'MON', raw: 2, avg: 1.5 },
+    { day: 'TUE', raw: 4, avg: 2.8 },
+    { day: 'WED', raw: 6, avg: 4.0 },
+    { day: 'THU', raw: 3, avg: 3.2 },
+    { day: 'FRI', raw: 5, avg: 4.1 },
+    { day: 'SAT', raw: 1, avg: 1.8 },
+    { day: 'SUN', raw: 2, avg: 2.0 },
 ];
 
-/* ── Timer hook ── */
-function useTimer(initial = 25 * 60) {
-  const [secs, setSecs] = useState(initial);
-  const [running, setRunning] = useState(false);
-  const ref = useRef(null);
-  useEffect(() => {
-    if (running) {
-      ref.current = setInterval(() => setSecs(s => s > 0 ? s - 1 : 0), 1000);
-    } else clearInterval(ref.current);
-    return () => clearInterval(ref.current);
-  }, [running]);
-  const mm = String(Math.floor(secs / 60)).padStart(2, '0');
-  const ss = String(secs % 60).padStart(2, '0');
-  return { display: `${mm}:${ss}`, running, toggle: () => setRunning(r => !r), reset: () => { setRunning(false); setSecs(initial); } };
-}
+const curriculum = [
+    { code: 'MTH-402', name: 'Multivariable Integration', efficiency: 75.0, color: '#7B5CF0', topic: 'Triple integrals in spherical coordinates and vector fields.' },
+    { code: 'BIO-612', name: 'CRISPR Gene Editing', efficiency: 42.8, color: '#22c55e', topic: 'Analysis of CAS9 molecular sequencing and target binding.' },
+    { code: 'HIS-101', name: 'Industrial Revolution', efficiency: 88.2, color: '#f97316', topic: 'Socioeconomic shift and mechanization in 19th-century Europe.' },
+];
 
-/* ── Custom tooltip ── */
-function ChartTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="db-tooltip">
-      <div className="db-tooltip-label">{label}</div>
-      <div className="db-tooltip-value">{payload[0].value} cycles</div>
+// --- Componente KPI Card ---
+const KPICard = ({ label, value, sub, icon, highlight }) => (
+    <div className={`rounded-xl border p-5 flex flex-col gap-2 ${
+        highlight
+            ? 'bg-violet-950/40 border-violet-500/30'
+            : 'bg-[#141414] border-white/[0.06]'
+    }`}>
+        <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold tracking-widest text-white/40 uppercase">{label}</span>
+            <span className="text-white/25 text-base">{icon}</span>
+        </div>
+        <div className="flex items-end gap-2">
+            <span className={`text-3xl font-bold tabular-nums leading-none ${
+                highlight ? 'text-violet-300' : 'text-white'
+            }`}>{value}</span>
+            {sub && <span className="text-xs text-white/40 mb-1">{sub}</span>}
+        </div>
     </div>
-  );
-}
+);
 
-export default function DashboardPage() {
-  const navigate = useNavigate();
-  const timer = useTimer();
-  const [mode, setMode] = useState('RAW');
-  const data = mode === 'RAW' ? WEEKLY_RAW : WEEKLY_AVG;
-  const progress = ((25 * 60 - parseInt(timer.display.replace(':', ''))) / (25 * 60)) * 100;
-  const circumference = 2 * Math.PI * 52;
+// --- Componente Timer circular ---
+const FocusTimer = () => {
+    const TOTAL = 25 * 60;
+    const [seconds, setSeconds] = useState(TOTAL);
+    const [running, setRunning] = useState(false);
+    const intervalRef = useRef(null);
 
-  return (
-    <div className="db-page">
-      {/* ── Top bar ── */}
-      <header className="db-topbar">
-        <div className="db-topbar-left">
-          <span className="db-topbar-title">Dashboard</span>
-          <span className="db-topbar-session">Active session: Quantum Physics</span>
-        </div>
-        <div className="db-topbar-right">
-          <span className="db-streak-badge">🔥 12 DAY STREAK</span>
-          <button className="db-icon-btn" aria-label="Search">🔍</button>
-          <button className="db-icon-btn" aria-label="Notifications">🔔</button>
-        </div>
-      </header>
+    useEffect(() => {
+        if (running) {
+            intervalRef.current = setInterval(() => {
+                setSeconds(s => {
+                    if (s <= 1) { clearInterval(intervalRef.current); setRunning(false); return 0; }
+                    return s - 1;
+                });
+            }, 1000);
+        } else {
+            clearInterval(intervalRef.current);
+        }
+        return () => clearInterval(intervalRef.current);
+    }, [running]);
 
-      <div className="db-content">
-        {/* ── KPI Cards ── */}
-        <div className="db-kpi-row">
-          {[
-            { label: 'HOURS FOCUSED',   value: '124.5', sub: '+12%',    icon: '⏱' },
-            { label: 'DEEP WORK XP',    value: '2,450', sub: 'LVL 24',  icon: '🎯' },
-            { label: 'RETENTION RATE',  value: '92',    sub: '%',       icon: '📚' },
-            { label: 'ACTIVE STREAK',   value: '12',    sub: 'DAYS',    icon: '⚡' },
-          ].map(k => (
-            <div key={k.label} className="db-kpi-card">
-              <div className="db-kpi-header">
-                <span className="db-kpi-label">{k.label}</span>
-                <span className="db-kpi-icon">{k.icon}</span>
-              </div>
-              <div className="db-kpi-val">
-                {k.value}
-                <span className="db-kpi-sub">{k.sub}</span>
-              </div>
+    const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    const progress = (TOTAL - seconds) / TOTAL;
+    const circumference = 2 * Math.PI * 54;
+    const strokeDash = circumference * progress;
+
+    const reset = () => { setRunning(false); setSeconds(TOTAL); };
+
+    return (
+        <div className="flex flex-col items-center justify-between h-full gap-4 py-2">
+            <p className="text-[11px] tracking-widest text-white/30 font-semibold uppercase">Focus Engine</p>
+
+            {/* Círculo SVG */}
+            <div className="relative flex items-center justify-center">
+                <svg width="140" height="140" viewBox="0 0 140 140">
+                    <circle cx="70" cy="70" r="54" fill="none" stroke="#ffffff08" strokeWidth="6" />
+                    <circle
+                        cx="70" cy="70" r="54"
+                        fill="none"
+                        stroke={running ? '#7B5CF0' : '#ffffff20'}
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        strokeDasharray={`${strokeDash} ${circumference}`}
+                        strokeDashoffset="0"
+                        transform="rotate(-90 70 70)"
+                        style={{ transition: 'stroke-dasharray 1s linear' }}
+                    />
+                </svg>
+                <div className="absolute flex flex-col items-center">
+                    <span className="text-3xl font-bold tabular-nums text-white">{mins}:{secs}</span>
+                    <span className={`text-[10px] tracking-widest font-semibold mt-1 ${
+                        running ? 'text-violet-400' : 'text-white/30'
+                    }`}>
+                        {running ? '● FOCUS_MODE' : '● IDLE_MODE'}
+                    </span>
+                </div>
             </div>
-          ))}
+
+            {/* Controles */}
+            <div className="w-full flex flex-col gap-2">
+                <button
+                    onClick={() => setRunning(r => !r)}
+                    className="w-full py-3 bg-white hover:bg-white/90 text-black text-sm font-bold rounded-lg tracking-widest transition-colors"
+                >
+                    {running ? '⏸ PAUSE' : '▶ INITIATE FOCUS'}
+                </button>
+                {(running || seconds < TOTAL) && (
+                    <button
+                        onClick={reset}
+                        className="w-full py-2 bg-white/5 hover:bg-white/10 text-white/50 text-xs font-semibold rounded-lg tracking-widest transition-colors"
+                    >
+                        ↺ RESET
+                    </button>
+                )}
+                <p className="text-center text-[11px] text-white/25 tracking-wide">Session: Quantum_Phy_L4 · 01/04 Cycles</p>
+            </div>
         </div>
+    );
+};
 
-        {/* ── Main row ── */}
-        <div className="db-main-row">
-          {/* Chart */}
-          <div className="db-chart-card">
-            <div className="db-chart-header">
-              <div>
-                <div className="db-chart-title">WEEKLY INTENSITY DISTRIBUTION</div>
-                <div className="db-chart-sub">MEASURED IN FOCUS CYCLES PER INTERVAL</div>
-              </div>
-              <div className="db-chart-tabs">
-                {['W-AVG', 'RAW'].map(m => (
-                  <button key={m} className={'db-tab' + (mode === m ? ' active' : '')} onClick={() => setMode(m)}>{m}</button>
-                ))}
-              </div>
+// --- Componente Curriculum Card ---
+const CurriculumCard = ({ code, name, efficiency, color, topic }) => (
+    <div className="bg-[#141414] border border-white/[0.06] rounded-xl p-5 flex flex-col gap-3 hover:border-white/10 transition-colors">
+        <div className="flex items-start justify-between">
+            <span className="text-[11px] font-mono font-semibold tracking-widest" style={{ color }}>{code}</span>
+            <span className="text-white/20 text-sm">⊙</span>
+        </div>
+        <p className="text-sm font-semibold text-white leading-snug">{name}</p>
+        <div className="flex flex-col gap-1.5">
+            <div className="flex justify-between items-center">
+                <span className="text-[11px] tracking-widest text-white/30 font-medium">EFFICIENCY</span>
+                <span className="text-sm font-bold tabular-nums text-white/80">{efficiency.toFixed(1)}%</span>
             </div>
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="cycleGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#7c3aed" stopOpacity={0.35}/>
-                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f1f1f" vertical={false}/>
-                <XAxis dataKey="day" tick={{ fill: '#555', fontSize: 10, letterSpacing: 1 }} axisLine={false} tickLine={false}/>
-                <YAxis tick={{ fill: '#555', fontSize: 10 }} axisLine={false} tickLine={false}/>
-                <Tooltip content={<ChartTooltip />}/>
-                <Area type="monotone" dataKey="cycles" stroke="#7c3aed" strokeWidth={2} fill="url(#cycleGrad)" dot={{ fill: '#7c3aed', r: 3 }} activeDot={{ r: 5 }}/>
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Timer */}
-          <div className="db-timer-card">
-            <div className="db-timer-header">
-              <span className="db-timer-title">FOCUS ENGINE</span>
-              <span className="db-timer-settings">⚙</span>
-            </div>
-            <div className="db-timer-ring">
-              <svg viewBox="0 0 120 120" className="db-ring-svg">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="#1a1a1a" strokeWidth="6"/>
-                <circle
-                  cx="60" cy="60" r="52" fill="none"
-                  stroke="#7c3aed" strokeWidth="6"
-                  strokeDasharray={circumference}
-                  strokeDashoffset={circumference * (1 - Math.min(progress / 100, 1))}
-                  strokeLinecap="round"
-                  transform="rotate(-90 60 60)"
-                  style={{ transition: 'stroke-dashoffset 1s linear' }}
+            <div className="w-full h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${efficiency}%`, backgroundColor: color }}
                 />
-                <text x="60" y="56" textAnchor="middle" fill="#e5e5e5" fontSize="18" fontWeight="700" fontFamily="monospace">{timer.display}</text>
-                <text x="60" y="70" textAnchor="middle" fill={timer.running ? '#6daa45' : '#555'} fontSize="7" letterSpacing="2">{timer.running ? '● RUNNING' : '● IDLE_MODE'}</text>
-              </svg>
             </div>
-            <button className="db-focus-btn" onClick={timer.toggle}>
-              {timer.running ? '⏸ PAUSE' : '▶ INITIATE FOCUS'}
-            </button>
-            <div className="db-timer-meta">
-              <span>Session: Quantum_Phy_L4</span>
-              <span>01/04 Cycles</span>
-            </div>
-          </div>
         </div>
-
-        {/* ── Curriculum ── */}
-        <div className="db-curriculum-section">
-          <div className="db-curriculum-header">
-            <div>
-              <div className="db-curriculum-title">ACTIVE CURRICULUM</div>
-              <div className="db-curriculum-sub">Core study plans and modular progress</div>
-            </div>
-            <button className="db-view-registry" onClick={() => navigate('/study-plans')}>VIEW REGISTRY ↗</button>
-          </div>
-          <div className="db-curriculum-grid">
-            {CURRICULUM.map(c => (
-              <div key={c.code} className="db-curr-card">
-                <div className="db-curr-top">
-                  <span className="db-curr-code">{c.code}</span>
-                  <span className="db-curr-icon">{c.icon}</span>
-                </div>
-                <div className="db-curr-name">{c.name}</div>
-                <div className="db-curr-efficiency-row">
-                  <span className="db-curr-eff-label">EFFICIENCY</span>
-                  <span className="db-curr-eff-val">{c.pct}%</span>
-                </div>
-                <div className="db-progress-track">
-                  <div className="db-progress-fill" style={{ width: `${c.pct}%`, background: c.color }}/>
-                </div>
-                <div className="db-curr-topic">{c.topic}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="db-footer">
-        <span className="db-footer-brand">E &nbsp; ENFOCA OS</span>
-        <div className="db-footer-links">
-          <a href="#">MANIFESTO</a>
-          <a href="#">ARCHITECTURE</a>
-          <a href="#">NODES</a>
-        </div>
-        <span className="db-footer-ver">V2.4.0-STABLE // BUILD_804471</span>
-      </footer>
+        <p className="text-[11px] text-white/35 leading-relaxed">
+            <span className="text-white/20">Topic: </span>{topic}
+        </p>
     </div>
-  );
-}
+);
+
+// --- Página principal Dashboard ---
+const DashboardPage = () => {
+    const { user } = useContext(AuthContext);
+    const [chartMode, setChartMode] = useState('RAW');
+    const activeSession = 'Quantum Physics';
+
+    return (
+        <div className="min-h-full bg-[#0a0a0a] p-6 flex flex-col gap-6">
+
+            {/* Top bar */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <h1 className="text-base font-semibold text-white">Dashboard</h1>
+                    <span className="text-white/20">|</span>
+                    <span className="text-[12px] text-white/40 font-mono">Active session: {activeSession}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5 bg-[#1a1a1a] border border-white/[0.06] rounded-lg px-3 py-1.5">
+                        <span className="text-orange-400 text-sm">🔥</span>
+                        <span className="text-[12px] font-bold text-white tracking-wide">12 DAY STREAK</span>
+                    </div>
+                    <button className="text-white/30 hover:text-white/60 transition-colors">🔔</button>
+                </div>
+            </div>
+
+            {/* KPIs */}
+            <div className="grid grid-cols-4 gap-3">
+                <KPICard label="Hours Focused" value="124.5" sub="+12%" icon="⏱" />
+                <KPICard label="Deep Work XP" value="2,450" sub="LVL 24" icon="◎" />
+                <KPICard label="Retention Rate" value="92" sub="%" icon="≋" />
+                <KPICard label="Active Streak" value="12" sub="DAYS" icon="⚡" highlight />
+            </div>
+
+            {/* Gráfico + Timer */}
+            <div className="grid grid-cols-[1fr_280px] gap-3">
+                {/* Gráfico semanal */}
+                <div className="bg-[#141414] border border-white/[0.06] rounded-xl p-5">
+                    <div className="flex items-start justify-between mb-1">
+                        <div>
+                            <p className="text-[11px] font-semibold tracking-widest text-white uppercase">Weekly Intensity Distribution</p>
+                            <p className="text-[10px] text-white/25 tracking-widest mt-0.5">MEASURED IN FOCUS CYCLES PER INTERVAL</p>
+                        </div>
+                        <div className="flex gap-1">
+                            {['W-AVG', 'RAW'].map(m => (
+                                <button
+                                    key={m}
+                                    onClick={() => setChartMode(m)}
+                                    className={`px-3 py-1 text-[11px] font-semibold rounded tracking-wide transition-colors ${
+                                        chartMode === m
+                                            ? 'bg-white/15 text-white'
+                                            : 'text-white/30 hover:text-white/60'
+                                    }`}
+                                >
+                                    {m}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={200}>
+                        <AreaChart data={weeklyData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="colorGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#7B5CF0" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#7B5CF0" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" />
+                            <XAxis dataKey="day" tick={{ fill: '#ffffff30', fontSize: 11, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
+                            <YAxis tick={{ fill: '#ffffff30', fontSize: 10 }} axisLine={false} tickLine={false} />
+                            <Tooltip
+                                contentStyle={{ background: '#1a1a1a', border: '1px solid #ffffff15', borderRadius: 8, color: '#fff', fontSize: 12 }}
+                                cursor={{ stroke: '#7B5CF0', strokeWidth: 1 }}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey={chartMode === 'RAW' ? 'raw' : 'avg'}
+                                stroke="#7B5CF0"
+                                strokeWidth={2}
+                                fill="url(#colorGrad)"
+                                dot={{ fill: '#7B5CF0', r: 3 }}
+                                activeDot={{ r: 5, fill: '#7B5CF0' }}
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Focus Timer */}
+                <div className="bg-[#141414] border border-white/[0.06] rounded-xl p-5">
+                    <FocusTimer />
+                </div>
+            </div>
+
+            {/* Active Curriculum */}
+            <div>
+                <div className="flex items-center justify-between mb-3">
+                    <div>
+                        <p className="text-[13px] font-semibold text-white tracking-wide">Active Curriculum</p>
+                        <p className="text-[11px] text-white/30 mt-0.5">Core study plans and modular progress</p>
+                    </div>
+                    <button className="text-[11px] text-violet-400 hover:text-violet-300 font-semibold tracking-widest transition-colors">
+                        VIEW REGISTRY ↗
+                    </button>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                    {curriculum.map(c => <CurriculumCard key={c.code} {...c} />)}
+                </div>
+            </div>
+
+            {/* Footer */}
+            <footer className="flex items-center justify-between pt-2 border-t border-white/[0.04] mt-auto">
+                <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded bg-violet-600 flex items-center justify-center">
+                        <span className="text-[9px] font-bold text-white">E</span>
+                    </div>
+                    <span className="text-[11px] tracking-widest text-white/20 font-semibold">ENFOCA OS</span>
+                </div>
+                <div className="flex gap-6">
+                    {['MANIFESTO', 'ARCHITECTURE', 'NODES'].map(l => (
+                        <button key={l} className="text-[10px] tracking-widest text-white/20 hover:text-white/40 font-medium transition-colors">{l}</button>
+                    ))}
+                </div>
+                <span className="text-[10px] font-mono text-white/15">V2.4.0-STABLE // BUILD_804471</span>
+            </footer>
+        </div>
+    );
+};
+
+export default DashboardPage;
