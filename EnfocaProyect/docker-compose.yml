@@ -240,6 +240,7 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: gamification-service
       EUREKA_INSTANCE_INSTANCEID: gamification-service:8088
+      SPRING_CLOUD_COMPATIBILITY_VERIFIER_ENABLED: "false"
     restart: unless-stopped
 
   metrics-service:
