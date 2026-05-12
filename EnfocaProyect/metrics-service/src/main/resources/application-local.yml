@@ -18,6 +18,15 @@ app:
   pomodoro-service:
     url: http://localhost:8082
 
+eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+    instance-id: ${spring.application.name}:8083
+    status-page-url: http://localhost:8083/actuator/info
+    health-check-url: http://localhost:8083/actuator/health
+    home-page-url: http://localhost:8083/
+
 logging:
   level:
     online.enfoca.metricsservice: DEBUG

@@ -52,6 +52,13 @@ eureka:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
     register-with-eureka: true
     fetch-registry: false
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+    instance-id: ${spring.application.name}:8085
+    status-page-url: http://localhost:8085/actuator/info
+    health-check-url: http://localhost:8085/actuator/health
+    home-page-url: http://localhost:8085/
 
 enfoca:
   ia:

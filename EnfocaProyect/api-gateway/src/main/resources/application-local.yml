@@ -1,6 +1,11 @@
 eureka:
   instance:
     hostname: localhost
+    prefer-ip-address: false
+    instance-id: ${spring.application.name}:${server.port}
+    status-page-url: http://localhost:${server.port}/actuator/info
+    health-check-url: http://localhost:${server.port}/actuator/health
+    home-page-url: http://localhost:${server.port}/
 
 spring:
   data:

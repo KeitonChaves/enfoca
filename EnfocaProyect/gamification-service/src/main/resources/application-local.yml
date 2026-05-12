@@ -17,6 +17,15 @@ spring:
     enabled: true
     out-of-order: true
 
+eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+    instance-id: ${spring.application.name}:8088
+    status-page-url: http://localhost:8088/actuator/info
+    health-check-url: http://localhost:8088/actuator/health
+    home-page-url: http://localhost:8088/
+
 logging:
   level:
     online.enfoca.gamificationservice: DEBUG

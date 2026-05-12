@@ -18,6 +18,15 @@ app:
     from: noreply@enfoca.online
     frontend-url: http://localhost:5173
 
+eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+    instance-id: ${spring.application.name}:8081
+    status-page-url: http://localhost:8081/actuator/info
+    health-check-url: http://localhost:8081/actuator/health
+    home-page-url: http://localhost:8081/
+
 logging:
   level:
     online.enfoca.authservice: DEBUG
