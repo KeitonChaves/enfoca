@@ -4,9 +4,9 @@ spring:
       on-profile: local
 
   datasource:
-    url: jdbc:postgresql://127.0.0.1:5437/enfoca_metrics
-    username: postgres
-    password: postgres
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5437/enfoca_metrics}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
 
   flyway:
     enabled: true
@@ -17,7 +17,7 @@ app:
   jwt:
     secret: dGhpcy1pcy1hLXZlcnktc2VjdXJlLXNlY3JldC1rZXktZm9yLWRldmVsb3BtZW50LW9ubHk=
   pomodoro-service:
-    url: http://localhost:8082
+    url: ${POMODORO_SERVICE_URL:http://localhost:8082}
 
 eureka:
   instance:

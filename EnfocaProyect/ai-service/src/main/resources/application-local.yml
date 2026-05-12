@@ -4,9 +4,9 @@ spring:
       on-profile: local
 
   datasource:
-    url: jdbc:postgresql://127.0.0.1:5435/enfoca_planes
-    username: postgres
-    password: postgres
+    url: ${AI_DB_URL:jdbc:postgresql://127.0.0.1:5435/enfoca_planes}
+    username: ${AI_DB_USERNAME:postgres}
+    password: ${AI_DB_PASSWORD:postgres}
 
   jpa:
     show-sql: true
