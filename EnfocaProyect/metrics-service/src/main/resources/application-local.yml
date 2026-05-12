@@ -20,6 +20,11 @@ app:
     url: ${POMODORO_SERVICE_URL:http://localhost:8082}
 
 eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: false
   instance:
     hostname: localhost
     prefer-ip-address: false

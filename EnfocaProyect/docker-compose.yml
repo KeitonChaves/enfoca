@@ -262,6 +262,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       JWT_SECRET: ${JWT_SECRET_KEY}
       POMODORO_SERVICE_URL: http://pomodoro-service:8082
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: metrics-service
+      EUREKA_INSTANCE_INSTANCEID: metrics-service:8083
     restart: unless-stopped
 
   api-gateway:
