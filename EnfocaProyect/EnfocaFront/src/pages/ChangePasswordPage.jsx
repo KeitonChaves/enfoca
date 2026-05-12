@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { profileService } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 const IconLock = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -70,6 +72,10 @@ export default function ChangePasswordPage() {
     const [errors, setErrors]   = useState({});
     const [status, setStatus]   = useState(null); // 'loading' | 'success' | 'error'
     const [serverMsg, setServerMsg] = useState('');
+    const [countdown, setCountdown] = useState(3);
+
+    const { logout } = useAuth();
+    const navigate   = useNavigate();
 
     const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
     const toggle = (field) => () => setShow((s) => ({ ...s, [field]: !s[field] }));
@@ -102,6 +108,17 @@ export default function ChangePasswordPage() {
             setStatus('success');
             setForm({ current: '', next: '', confirm: '' });
             setErrors({});
+
+            let secs = 3;
+            setCountdown(secs);
+            const timer = setInterval(() => {
+                secs -= 1;
+                setCountdown(secs);
+                if (secs <= 0) {
+                    clearInterval(timer);
+                    logout(() => navigate('/login'));
+                }
+            }, 1000);
         } catch (err) {
             setStatus('error');
             const msg = err.response?.data?.message || err.response?.data?.error;
@@ -125,7 +142,10 @@ export default function ChangePasswordPage() {
                 {status === 'success' && (
                     <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
                         <IconCheck />
-                        Contraseña actualizada correctamente.
+                        <span>
+                            Contraseña actualizada. Redirigiendo al login en{' '}
+                            <span className="font-bold">{countdown}s</span>...
+                        </span>
                     </div>
                 )}
 
