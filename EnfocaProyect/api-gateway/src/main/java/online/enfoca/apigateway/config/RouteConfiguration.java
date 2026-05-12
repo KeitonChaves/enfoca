@@ -23,7 +23,7 @@ public class RouteConfiguration {
                 .route("pomodoro-route", r -> r.path("/pomodoro-sessions/**")
                         .filters(f -> f.circuitBreaker(c -> c.setName("pomodoro-service")))
                         .uri("lb://pomodoro-service"))
-                .route("metrics-route", r -> r.path("/metricas/**")
+                .route("metrics-route", r -> r.path("/api/metrics/**")
                         .filters(f -> f.circuitBreaker(c -> c.setName("metrics-service")))
                         .uri("http://metrics-service:8083"))
                 .route("ai-planes-route", r -> r.path("/planes-estudio/**")
