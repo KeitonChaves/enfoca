@@ -1,5 +1,9 @@
 services:
 
+  # ================================================================
+  # BASES DE DATOS
+  # ================================================================
+
   auth-db:
     image: postgres:15
     container_name: auth-db
@@ -11,7 +15,12 @@ services:
     ports:
       - "5434:5432"
     volumes:
+      - auth-db-data:/var/lib/postgresql/data
       - ./auth-service/src/main/resources/db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
     restart: unless-stopped
 
   pomodoro-db:
@@ -24,6 +33,12 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5433:5432"
+    volumes:
+      - pomodoro-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U enfoca"]
+      interval: 5s
+      retries: 10
     restart: unless-stopped
 
   ai-db:
@@ -36,6 +51,12 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5435:5432"
+    volumes:
+      - ai-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
     restart: unless-stopped
 
   gamification-db:
@@ -48,6 +69,12 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5436:5432"
+    volumes:
+      - gamification-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
     restart: unless-stopped
 
   metrics-db:
@@ -60,7 +87,17 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5437:5432"
+    volumes:
+      - metrics-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
     restart: unless-stopped
+
+  # ================================================================
+  # MENSAJERÍA Y CACHÉ
+  # ================================================================
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -68,6 +105,10 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      retries: 10
     restart: unless-stopped
 
   redis:
@@ -76,3 +117,165 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
+
+  # ================================================================
+  # DESCUBRIMIENTO (debe arrancar primero)
+  # ================================================================
+
+  discovery-service:
+    build: ./discovery-service
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      EUREKA_INSTANCE_HOSTNAME: discovery-service
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8761/actuator/health | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+
+  # ================================================================
+  # MICROSERVICIOS
+  # ================================================================
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/enfoca_auth
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: auth-service
+      EUREKA_INSTANCE_INSTANCEID: auth-service:8081
+    restart: unless-stopped
+
+  ai-service:
+    build: ./ai-service
+    container_name: ai-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      ai-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      AI_DB_URL: jdbc:postgresql://ai-db:5432/enfoca_planes
+      RABBITMQ_HOST: rabbitmq
+      REDIS_HOST: redis
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: ai-service
+      EUREKA_INSTANCE_INSTANCEID: ai-service:8085
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  pomodoro-service:
+    build: ./pomodoro-service
+    container_name: pomodoro-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      pomodoro-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pomodoro-db:5432/enfoca
+      SPRING_DATASOURCE_USERNAME: enfoca
+      SPRING_DATASOURCE_PASSWORD: enfoca
+      RABBITMQ_HOST: rabbitmq
+      REDIS_HOST: redis
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: pomodoro-service
+      EUREKA_INSTANCE_INSTANCEID: pomodoro-service:8082
+    restart: unless-stopped
+
+  gamification-service:
+    build: ./gamification-service
+    container_name: gamification-service
+    ports:
+      - "8088:8088"
+    depends_on:
+      gamification-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://gamification-db:5432/enfoca_gamification
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      RABBITMQ_HOST: rabbitmq
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: gamification-service
+      EUREKA_INSTANCE_INSTANCEID: gamification-service:8088
+    restart: unless-stopped
+
+  metrics-service:
+    build: ./metrics-service
+    container_name: metrics-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      metrics-db:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://metrics-db:5432/enfoca_metrics
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET_KEY}
+      POMODORO_SERVICE_URL: http://pomodoro-service:8082
+    restart: unless-stopped
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ""
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: api-gateway
+      EUREKA_INSTANCE_INSTANCEID: api-gateway:8080
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    restart: unless-stopped
+
+# ================================================================
+# VOLÚMENES PERSISTENTES
+# ================================================================
+volumes:
+  auth-db-data:
+  pomodoro-db-data:
+  ai-db-data:
+  gamification-db-data:
+  metrics-db-data:
