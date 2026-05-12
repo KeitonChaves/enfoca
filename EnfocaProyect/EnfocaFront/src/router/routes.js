@@ -1,11 +1,12 @@
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
-import RecoverAccountPage from '../pages/RecoverAccountPage'; // Nueva
-import DashboardPage from '../pages/DashboardPage'; // Nueva
+import RecoverAccountPage from '../pages/RecoverAccountPage';
+import DashboardPage from '../pages/DashboardPage';
 import PomodoroPage from '../pages/PomodoroPage';
 import FocusModePage from '../pages/FocusModePage';
-import StudyPlanPage from '../pages/StudyPlanPage'; // Nueva
+import StudyPlanPage from '../pages/StudyPlanPage';
+import AnalyticsPage from '../pages/AnalyticsPage';
 
 // Rutas Públicas (Accesibles sin iniciar sesión)
 export const PUBLIC_ROUTES = [
@@ -55,6 +56,12 @@ export const PRIVATE_ROUTES = [
         element: StudyPlanPage,
         name: 'Plan de Estudio',
         icon: 'BookOpenIcon'
+    },
+    {
+        path: '/analytics',
+        element: AnalyticsPage,
+        name: 'Análisis',
+        icon: 'AnalyticsIcon'
     }
 ];
 

@@ -45,8 +45,8 @@ const IconSupport = () => (
 
 const NAV_ITEMS = [
     { to: '/dashboard', label: 'Panel', icon: <IconDashboard /> },
-    { to: '/focus', label: 'Modo Enfoque', icon: <IconFocus /> },
-    { to: '/study-plans', label: 'Planes de Estudio', icon: <IconStudy /> },
+    { to: '/focus-mode', label: 'Modo Enfoque', icon: <IconFocus /> },
+    { to: '/study-plan', label: 'Planes de Estudio', icon: <IconStudy /> },
     { to: '/analytics', label: 'Análisis', icon: <IconAnalytics /> },
 ];
 
