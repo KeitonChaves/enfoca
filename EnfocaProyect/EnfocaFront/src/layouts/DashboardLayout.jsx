@@ -42,6 +42,13 @@ const IconSupport = () => (
         <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round" strokeWidth="2.5" />
     </svg>
 );
+const IconKey = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="8" cy="15" r="5" />
+        <path d="M21 2l-9.3 9.3" />
+        <path d="M15 8l3 3" />
+    </svg>
+);
 
 const NAV_ITEMS = [
     { to: '/dashboard', label: 'Panel', icon: <IconDashboard /> },
@@ -108,6 +115,20 @@ export default function DashboardLayout() {
                 </nav>
 
                 <div className="px-3 pb-5 flex flex-col gap-1">
+                    <NavLink
+                        to="/settings/password"
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 px-3 py-2 text-sm transition-colors rounded-lg ${
+                                isActive
+                                    ? 'bg-white/5 text-white'
+                                    : 'text-neutral-600 hover:text-neutral-400 hover:bg-neutral-800/50'
+                            }`
+                        }
+                    >
+                        <IconKey />
+                        Cambiar contraseña
+                    </NavLink>
+
                     <button className="flex items-center gap-3 px-3 py-2 text-neutral-600 hover:text-neutral-400 text-sm transition-colors rounded-lg hover:bg-neutral-800/50">
                         <IconSupport />
                         Soporte

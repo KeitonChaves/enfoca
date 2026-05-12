@@ -7,6 +7,7 @@ import PomodoroPage from '../pages/PomodoroPage';
 import FocusModePage from '../pages/FocusModePage';
 import StudyPlanPage from '../pages/StudyPlanPage';
 import AnalyticsPage from '../pages/AnalyticsPage';
+import ChangePasswordPage from '../pages/ChangePasswordPage';
 
 // Rutas Públicas (Accesibles sin iniciar sesión)
 export const PUBLIC_ROUTES = [
@@ -62,6 +63,11 @@ export const PRIVATE_ROUTES = [
         element: AnalyticsPage,
         name: 'Análisis',
         icon: 'AnalyticsIcon'
+    },
+    {
+        path: '/settings/password',
+        element: ChangePasswordPage,
+        name: 'Cambiar Contraseña',
     }
 ];
 
