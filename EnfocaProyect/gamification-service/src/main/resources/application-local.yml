@@ -1,0 +1,22 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5436/enfoca_gamification
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  flyway:
+    enabled: true
+    out-of-order: true
+
+logging:
+  level:
+    online.enfoca.gamificationservice: DEBUG

@@ -1,0 +1,23 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5437/enfoca_metrics
+    username: postgres
+    password: postgres
+
+  flyway:
+    enabled: true
+    out-of-order: true
+
+app:
+  jwt:
+    secret: dGhpcy1pcy1hLXZlcnktc2VjdXJlLXNlY3JldC1rZXktZm9yLWRldmVsb3BtZW50LW9ubHk=
+  pomodoro-service:
+    url: http://localhost:8082
+
+logging:
+  level:
+    online.enfoca.metricsservice: DEBUG

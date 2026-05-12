@@ -1,0 +1,78 @@
+services:
+
+  auth-db:
+    image: postgres:15
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: enfoca_auth
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Kaoz1699
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./auth-service/src/main/resources/db/init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+  pomodoro-db:
+    image: postgres:15
+    container_name: pomodoro-db
+    environment:
+      POSTGRES_DB: enfoca
+      POSTGRES_USER: enfoca
+      POSTGRES_PASSWORD: enfoca
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    restart: unless-stopped
+
+  ai-db:
+    image: postgres:15
+    container_name: ai-db
+    environment:
+      POSTGRES_DB: enfoca_planes
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5435:5432"
+    restart: unless-stopped
+
+  gamification-db:
+    image: postgres:15
+    container_name: gamification-db
+    environment:
+      POSTGRES_DB: enfoca_gamification
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5436:5432"
+    restart: unless-stopped
+
+  metrics-db:
+    image: postgres:15
+    container_name: metrics-db
+    environment:
+      POSTGRES_DB: enfoca_metrics
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5437:5432"
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: pomodoro-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: pomodoro-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
