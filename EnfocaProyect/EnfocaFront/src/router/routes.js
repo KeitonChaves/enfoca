@@ -8,6 +8,7 @@ import FocusModePage from '../pages/FocusModePage';
 import StudyPlanPage from '../pages/StudyPlanPage';
 import AnalyticsPage from '../pages/AnalyticsPage';
 import ChangePasswordPage from '../pages/ChangePasswordPage';
+import ResetPasswordPage from '../pages/ResetPasswordPage';
 
 // Rutas Públicas (Accesibles sin iniciar sesión)
 export const PUBLIC_ROUTES = [
@@ -30,6 +31,11 @@ export const PUBLIC_ROUTES = [
         path: '/recover',
         element: RecoverAccountPage,
         name: 'Recuperar Cuenta'
+    },
+    {
+        path: '/reset-password',
+        element: ResetPasswordPage,
+        name: 'Restablecer Contraseña'
     }
 ];
 
