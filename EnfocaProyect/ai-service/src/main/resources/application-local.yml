@@ -1,0 +1,41 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5435/enfoca_planes
+    username: postgres
+    password: postgres
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+  flyway:
+    out-of-order: true
+    locations: classpath:db/migration,classpath:db/seeds
+
+  data:
+    redis:
+      host: coherent-hagfish-108591.upstash.io
+      port: 6379
+      password: gQAAAAAAAagvAAIgcDI4MjdlYzI1YTM4NTY0YmM3OTFkNTU5MTg0NzZlZDMwMQ
+      ssl:
+        enabled: true
+
+enfoca:
+  ia:
+    groq:
+      api-key: ${GROQ_API_KEY:}
+    gemini:
+      api-key: ${GEMINI_API_KEY:}
+    limites:
+      max-llamadas-por-hora: 100
+      ttl-cache-horas: 24
+
+logging:
+  level:
+    online.enfoca.aiservice: DEBUG
+    org.flywaydb: DEBUG
+    org.springframework.web.client: DEBUG
