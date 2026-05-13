@@ -115,13 +115,15 @@ export default function DashboardPage() {
         },
     ];
 
+    const ACCENTS = ['violet', 'emerald', 'amber'];
+
     const curriculumItems = planes.length > 0
-        ? planes.slice(0, 3).map((p) => ({
-            code: p.id?.toString().padStart(3, '0') ?? '---',
+        ? planes.slice(0, 3).map((p, i) => ({
+            code: p.id ? p.id.toString().slice(-6).toUpperCase() : String(i + 1).padStart(3, '0'),
             title: p.titulo ?? p.title ?? 'Plan sin título',
-            efficiency: p.progreso ?? p.progress ?? 0,
-            topic: p.descripcion ?? p.description ?? '',
-            accent: 'violet',
+            efficiency: p.progreso?.porcentaje ?? p.progreso ?? p.progress ?? 0,
+            topic: p.objetivo ?? p.descripcion ?? p.description ?? '',
+            accent: ACCENTS[i % ACCENTS.length],
             icon: <IconSigma />,
         }))
         : CURRICULUM_FALLBACK;
