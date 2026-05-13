@@ -13,7 +13,8 @@ export default function Navbar() {
     };
 
     const getUserDisplayName = () => {
-        return user?.nombre || user?.firstName || 'Usuario';
+        const fullName = user?.nombre || user?.firstName || 'Usuario';
+        return fullName.split(' ')[0];
     };
 
     const handleLogout = () => {
@@ -65,7 +66,7 @@ export default function Navbar() {
                                     {getUserInitial()}
                                 </div>
                             )}
-                            <span className="hidden lg:inline text-neutral-300">
+                            <span className="text-neutral-300 text-sm">
                                 {getUserDisplayName()}
                             </span>
                         </Link>
