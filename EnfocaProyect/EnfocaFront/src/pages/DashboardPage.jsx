@@ -1,48 +1,54 @@
 import { useState, useEffect } from 'react';
 import StatCard from '../components/dashboard/StatCard';
 import WeeklyChart from '../components/dashboard/WeeklyChart';
-import FocusEngine from '../components/dashboard/FocusEngine';
 import CurriculumCard from '../components/dashboard/CurriculumCard';
+import Sidebar from '../components/common/Sidebar';
 import { metricsService, planService } from '../services/api';
 
 const IconClock = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 15" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
-const IconTarget = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" />
-        <circle cx="12" cy="12" r="1" fill="currentColor" />
+const IconStar = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
     </svg>
 );
-const IconLayers = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <polygon points="12 2 2 7 12 12 22 7 12 2" />
-        <polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" />
+const IconShield = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <polyline points="9 12 11 14 15 10" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
-const IconBolt = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+const IconFire = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm0 13c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
     </svg>
 );
-const IconSigma = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M18 4H6l7 8-7 8h12" />
+const IconBook = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        <line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/>
     </svg>
 );
-const IconUpload = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" />
-        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+const IconMicroscope = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M6 18h8"/><path d="M3 21h18"/>
+        <path d="M14 21v-4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v4"/>
+        <path d="M14 7l2-2-5-5-2 2"/>
+        <path d="M9 12l5-5"/>
+        <path d="M13 7l4 4-3.5 3.5"/>
+        <circle cx="8.5" cy="15.5" r=".5" fill="currentColor"/>
     </svg>
 );
-const IconGlobe = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="12" cy="12" r="9" />
-        <line x1="3.05" y1="9" x2="20.95" y2="9" /><line x1="3.05" y1="15" x2="20.95" y2="15" />
-        <path d="M12 3a14.5 14.5 0 0 1 0 18 14.5 14.5 0 0 1 0-18" />
+const IconHistory = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="12" cy="12" r="9"/>
+        <line x1="3.05" y1="9" x2="20.95" y2="9"/><line x1="3.05" y1="15" x2="20.95" y2="15"/>
+        <path d="M12 3a14.5 14.5 0 0 1 0 18 14.5 14.5 0 0 1 0-18"/>
     </svg>
 );
 
@@ -95,7 +101,7 @@ export default function DashboardPage() {
             efficiency: 75.0,
             topic: 'Tema: Integrales triples en coordenadas esféricas y campos vectoriales.',
             accent: 'violet',
-            icon: <IconSigma />,
+            icon: <IconBook />,
         },
         {
             code: 'BIO-612',
@@ -103,7 +109,7 @@ export default function DashboardPage() {
             efficiency: 42.8,
             topic: 'Tema: Análisis de secuenciación molecular CAS9 y unión a objetivos.',
             accent: 'emerald',
-            icon: <IconUpload />,
+            icon: <IconMicroscope />,
         },
         {
             code: 'HIS-101',
@@ -111,7 +117,7 @@ export default function DashboardPage() {
             efficiency: 88.2,
             topic: 'Tema: Cambio socioeconómico y mecanización en la Europa del siglo XIX.',
             accent: 'amber',
-            icon: <IconGlobe />,
+            icon: <IconHistory />,
         },
     ];
 
@@ -124,7 +130,7 @@ export default function DashboardPage() {
             efficiency: p.progreso?.porcentaje ?? p.progreso ?? p.progress ?? 0,
             topic: p.objetivo ?? p.descripcion ?? p.description ?? '',
             accent: ACCENTS[i % ACCENTS.length],
-            icon: <IconSigma />,
+            icon: <IconBook />,
         }))
         : CURRICULUM_FALLBACK;
 
@@ -135,14 +141,19 @@ export default function DashboardPage() {
 
     if (cargando) {
         return (
-            <div className="p-4 md:p-6 flex items-center justify-center h-full">
-                <div className="w-6 h-6 border-2 border-violet-600/30 border-t-violet-600 rounded-full animate-spin" />
+            <div className="flex h-screen bg-[#0c0c0c]">
+                <Sidebar />
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-violet-600/30 border-t-violet-600 rounded-full animate-spin" />
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="p-4 md:p-6 flex flex-col gap-5">
+        <div className="flex h-screen bg-[#0c0c0c] overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 overflow-auto p-4 md:p-6 flex flex-col gap-5">
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 <StatCard
@@ -151,33 +162,33 @@ export default function DashboardPage() {
                     badge={resumen?.variacionHoras ? `${resumen.variacionHoras > 0 ? '+' : ''}${resumen.variacionHoras}%` : undefined}
                     badgeColor="green"
                     icon={<IconClock />}
+                    accent="text-violet-400"
                 />
                 <StatCard
                     label="XP Trabajo Profundo"
                     value={xpTotal !== null ? xpTotal.toLocaleString('es-CL') : '—'}
                     badge={resumen?.nivel ? `NIV ${resumen.nivel}` : undefined}
                     badgeColor="neutral"
-                    icon={<IconTarget />}
+                    icon={<IconStar />}
+                    accent="text-yellow-400"
                 />
                 <StatCard
                     label="Tasa de Retención"
                     value={tasaRetencion !== null ? tasaRetencion : '—'}
                     unit={tasaRetencion !== null ? '%' : undefined}
-                    icon={<IconLayers />}
+                    icon={<IconShield />}
+                    accent="text-emerald-400"
                 />
                 <StatCard
                     label="Racha Activa"
                     value={rachaActiva !== null ? rachaActiva : '—'}
                     unit={rachaActiva !== null ? 'DÍAS' : undefined}
-                    icon={<IconBolt />}
-                    accent="text-amber-400"
+                    icon={<IconFire />}
+                    accent="text-orange-400"
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
-                <WeeklyChart data={datosSemana} />
-                <FocusEngine />
-            </div>
+            <WeeklyChart data={datosSemana} />
 
             <div>
                 <div className="flex items-end justify-between mb-4">
@@ -219,6 +230,7 @@ export default function DashboardPage() {
                 </div>
                 <span className="text-[10px] text-neutral-800 font-mono">v2.4.0-ESTABLE // BUILD_200431</span>
             </footer>
+            </div>
         </div>
     );
 }

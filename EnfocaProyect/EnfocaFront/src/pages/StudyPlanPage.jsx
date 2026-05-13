@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { planService } from '../services/api';
+import Sidebar from '../components/common/Sidebar';
 
 const TIME_OPTIONS = [
     { value: '2 horas', label: '2 Horas (Liviano)' },
@@ -132,7 +133,9 @@ export default function StudyPlanPage() {
     const planMostrado = planSeleccionado || planActual;
 
     return (
-        <div className="p-4 md:p-6 flex flex-col gap-8">
+        <div className="flex h-screen bg-[#0c0c0c] overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 overflow-auto p-4 md:p-6 flex flex-col gap-8">
 
             {/* Header */}
             <div>
@@ -469,6 +472,7 @@ export default function StudyPlanPage() {
                 </div>
                 <span className="text-[10px] text-neutral-800 font-mono">v2.4.0-ESTABLE // BUILD_200431</span>
             </footer>
+            </div>
         </div>
     );
 }

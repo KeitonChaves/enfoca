@@ -4,5 +4,6 @@ public enum EstadoPlan {
     ACTIVO,
     EN_REVISION,
     CONGELADO,
-    EN_MEJORA
+    EN_MEJORA,
+    COMPLETADO
 }

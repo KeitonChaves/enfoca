@@ -53,6 +53,8 @@ services:
       - "5435:5432"
     volumes:
       - ai-db-data:/var/lib/postgresql/data
+      - ./ai-service/src/main/resources/db/migration/V1__crear_esquema_planes.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./ai-service/src/main/resources/db/migration/V2__fix_usuario_id_varchar.sql:/docker-entrypoint-initdb.d/02_fix_varchar.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s

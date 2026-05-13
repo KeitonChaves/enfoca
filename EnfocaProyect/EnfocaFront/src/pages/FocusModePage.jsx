@@ -49,7 +49,6 @@ export default function FocusModePage() {
     const audioRef = useRef(null);
     const navigate = useNavigate();
 
-    // Pantalla completa al montar
     useEffect(() => {
         const el = document.documentElement;
         if (el.requestFullscreen) {
@@ -62,43 +61,27 @@ export default function FocusModePage() {
         };
     }, []);
 
-    // Fase PREPARING
     useEffect(() => {
         if (phase !== 'PREPARING') return;
         const id = setInterval(() => {
             setPrepLeft((prev) => {
-                if (prev <= 1) {
-                    clearInterval(id);
-                    setPhase('RUNNING');
-                    return 0;
-                }
+                if (prev <= 1) { clearInterval(id); setPhase('RUNNING'); return 0; }
                 return prev - 1;
             });
         }, 1000);
         return () => clearInterval(id);
     }, [phase]);
 
-    // Fase RUNNING
     useEffect(() => {
         if (phase !== 'RUNNING') return;
-
         audioRef.current?.play().catch(() => {});
-
         const id = setInterval(() => {
             setTimeLeft((prev) => {
-                if (prev <= 1) {
-                    clearInterval(id);
-                    setPhase('IDLE');
-                    return 0;
-                }
+                if (prev <= 1) { clearInterval(id); setPhase('IDLE'); return 0; }
                 return prev - 1;
             });
         }, 1000);
-
-        return () => {
-            clearInterval(id);
-            audioRef.current?.pause();
-        };
+        return () => { clearInterval(id); audioRef.current?.pause(); };
     }, [phase]);
 
     const handlePlayPause = () => {
@@ -108,9 +91,7 @@ export default function FocusModePage() {
 
     const handleClose = () => {
         audioRef.current?.pause();
-        if (document.fullscreenElement) {
-            document.exitFullscreen().catch(() => {});
-        }
+        if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
         navigate('/dashboard');
     };
 
@@ -119,14 +100,14 @@ export default function FocusModePage() {
         setMuted((m) => !m);
     };
 
-    const elapsed   = FOCUS_TIME - timeLeft;
-    const progress  = (elapsed / FOCUS_TIME) * 100;
-    const { m, s }  = fmt(timeLeft);
-    const elFmt     = fmt(elapsed);
-    const remFmt    = fmt(timeLeft);
+    const elapsed  = FOCUS_TIME - timeLeft;
+    const progress = (elapsed / FOCUS_TIME) * 100;
+    const { m, s } = fmt(timeLeft);
+    const elFmt    = fmt(elapsed);
+    const remFmt   = fmt(timeLeft);
 
     return (
-        <div className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center font-sans overflow-hidden select-none">
+        <div className="h-screen w-screen bg-black text-white flex flex-col overflow-hidden select-none">
 
             <audio ref={audioRef} src={STREAM_URL} muted={muted} />
 
@@ -141,17 +122,13 @@ export default function FocusModePage() {
             </div>
 
             {/* Header */}
-            <div className="absolute top-0 left-0 w-full px-8 py-6 flex justify-between items-center z-10">
+            <div className="relative z-10 flex-shrink-0 px-8 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                    <span className="uppercase tracking-[0.3em] text-[10px] font-bold text-neutral-400">
-                        ENFOCA
-                    </span>
+                    <span className="uppercase tracking-[0.3em] text-[10px] font-bold text-neutral-400">ENFOCA</span>
                     <button
                         onClick={toggleMute}
                         className={`flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-widest transition-colors ${
-                            phase === 'RUNNING'
-                                ? 'text-violet-400 hover:text-violet-300'
-                                : 'text-neutral-600 hover:text-neutral-400'
+                            phase === 'RUNNING' ? 'text-violet-400 hover:text-violet-300' : 'text-neutral-600 hover:text-neutral-400'
                         }`}
                     >
                         <IconVolume muted={muted} />
@@ -162,17 +139,13 @@ export default function FocusModePage() {
                                     <span
                                         key={i}
                                         className="w-px bg-violet-400 rounded-full animate-pulse"
-                                        style={{
-                                            height: `${6 + i * 3}px`,
-                                            animationDelay: `${i * 0.15}s`,
-                                        }}
+                                        style={{ height: `${6 + i * 3}px`, animationDelay: `${i * 0.15}s` }}
                                     />
                                 ))}
                             </span>
                         )}
                     </button>
                 </div>
-
                 <button
                     onClick={handleClose}
                     className="text-neutral-500 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5"
@@ -182,34 +155,39 @@ export default function FocusModePage() {
                 </button>
             </div>
 
-            {/* Centro */}
-            <div className="relative z-10 flex flex-col items-center w-full">
+            {/* Centro — ocupa el espacio disponible entre header y barra */}
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-center min-h-0">
 
-                <h2 className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 mb-8 font-medium">
+                <h2 className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 mb-4 font-medium">
                     {phase === 'PREPARING' && 'Preparando...'}
                     {phase === 'RUNNING'   && 'Focus Period'}
                     {phase === 'PAUSED'    && 'Pausado'}
                     {phase === 'IDLE'      && 'Sesión completada'}
                 </h2>
 
-                {/* Reloj */}
+                {/* Reloj — usa min(vw, vh) para garantizar que no desborde en ninguna resolución */}
                 {phase === 'PREPARING' ? (
-                    <div className="text-[clamp(120px,22vw,220px)] font-light leading-none tracking-tighter mb-16 tabular-nums text-violet-400 animate-pulse">
+                    <div
+                        className="font-light leading-none tracking-tighter tabular-nums text-violet-400 animate-pulse mb-8"
+                        style={{ fontSize: 'clamp(80px, min(20vw, 28vh), 200px)' }}
+                    >
                         {prepLeft}
                     </div>
                 ) : (
-                    <div className={`text-[clamp(100px,20vw,200px)] font-light leading-none tracking-tighter mb-16 tabular-nums transition-colors ${
-                        phase === 'PAUSED' ? 'text-neutral-500' : 'text-white'
-                    }`}>
+                    <div
+                        className={`font-light leading-none tracking-tighter tabular-nums transition-colors mb-8 ${
+                            phase === 'PAUSED' ? 'text-neutral-500' : 'text-white'
+                        }`}
+                        style={{ fontSize: 'clamp(72px, min(18vw, 26vh), 180px)' }}
+                    >
                         {m}:{s}
                     </div>
                 )}
 
-                {/* Controles */}
                 {(phase === 'RUNNING' || phase === 'PAUSED') && (
                     <button
                         onClick={handlePlayPause}
-                        className="w-16 h-16 rounded-full border border-neutral-700/50 flex items-center justify-center text-neutral-300 hover:text-white hover:bg-white/10 transition-all backdrop-blur-sm"
+                        className="w-14 h-14 rounded-full border border-neutral-700/50 flex items-center justify-center text-neutral-300 hover:text-white hover:bg-white/10 transition-all backdrop-blur-sm"
                     >
                         {phase === 'RUNNING' ? <IconPause /> : <IconPlay />}
                     </button>
@@ -225,10 +203,10 @@ export default function FocusModePage() {
                 )}
             </div>
 
-            {/* Barra de progreso */}
+            {/* Barra de progreso — footer fijo */}
             {phase !== 'PREPARING' && (
-                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-sm px-6 z-10">
-                    <div className="h-px w-full bg-neutral-800 rounded-full mb-4 overflow-hidden">
+                <div className="relative z-10 flex-shrink-0 px-8 pb-6 w-full max-w-lg mx-auto">
+                    <div className="h-px w-full bg-neutral-800 rounded-full mb-3 overflow-hidden">
                         <div
                             className="h-full bg-neutral-400 rounded-full transition-all duration-1000"
                             style={{ width: `${progress}%` }}

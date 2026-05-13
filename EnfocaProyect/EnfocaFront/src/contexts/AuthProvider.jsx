@@ -52,7 +52,11 @@ export const AuthProvider = ({children}) => {
             setIsAuthenticated(true);
             return {success: true};
         } catch (error) {
-            return {success: false, error: error.response?.data?.message || 'Credenciales incorrectas'};
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Credenciales incorrectas',
+                status: error.response?.status ?? 0,
+            };
         } finally {
             setLoading(false);
         }
