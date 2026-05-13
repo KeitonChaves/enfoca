@@ -27,9 +27,9 @@ spring:
 enfoca:
   ia:
     groq:
-      api-key: [ENFOCA API - GROQ]
+      api-key: ${GROQ_API_KEY:}
     gemini:
-      api-key: [ENFOCA API - GEMINI]
+      api-key: ${GEMINI_API_KEY:}
     limites:
       max-llamadas-por-hora: 100
       ttl-cache-horas: 24
