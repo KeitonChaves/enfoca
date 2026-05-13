@@ -43,10 +43,6 @@ export default function Sidebar() {
 
             {/* Footer de Sidebar */}
             <div className="mt-auto space-y-4">
-                <button
-                    className="w-full py-3 bg-violet-500 hover:bg-violet-400 text-black font-bold rounded-lg text-xs uppercase tracking-widest transition-colors">
-                    Start Session
-                </button>
                 <div className="pt-4 border-t border-neutral-800 space-y-3">
                     <div className="flex items-center gap-3 text-neutral-500 text-sm hover:text-white cursor-pointer">
                         <span>?</span> Support
