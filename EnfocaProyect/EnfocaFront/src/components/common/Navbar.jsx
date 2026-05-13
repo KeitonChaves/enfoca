@@ -33,11 +33,13 @@ export default function Navbar() {
                 <img src="/logo.png" alt="Enfoca" className="h-14 w-auto object-contain" />
             </Link>
 
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
-                <Link to="/pomodoro" className="hover:text-white transition-colors">Enfoque</Link>
-                <Link to="/study-plan" className="hover:text-white transition-colors">Plan de Estudio</Link>
-                <Link to="/focus-mode" className="hover:text-white transition-colors">Deep Focus</Link>
-            </div>
+            {isAuthenticated && (
+                <div className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
+                    <Link to="/pomodoro" className="hover:text-white transition-colors">Enfoque</Link>
+                    <Link to="/study-plan" className="hover:text-white transition-colors">Plan de Estudio</Link>
+                    <Link to="/focus-mode" className="hover:text-white transition-colors">Deep Focus</Link>
+                </div>
+            )}
 
             <div className="flex items-center gap-4 text-sm font-medium">
                 {!isAuthenticated ? (
