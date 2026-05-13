@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import StatCard from '../components/dashboard/StatCard';
 import WeeklyChart from '../components/dashboard/WeeklyChart';
-import FocusEngine from '../components/dashboard/FocusEngine';
 import CurriculumCard from '../components/dashboard/CurriculumCard';
+import Sidebar from '../components/common/Sidebar';
 import { metricsService, planService } from '../services/api';
 
 const IconClock = () => (
@@ -135,14 +135,19 @@ export default function DashboardPage() {
 
     if (cargando) {
         return (
-            <div className="p-4 md:p-6 flex items-center justify-center h-full">
-                <div className="w-6 h-6 border-2 border-violet-600/30 border-t-violet-600 rounded-full animate-spin" />
+            <div className="flex h-screen bg-[#0c0c0c]">
+                <Sidebar />
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-violet-600/30 border-t-violet-600 rounded-full animate-spin" />
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="p-4 md:p-6 flex flex-col gap-5">
+        <div className="flex h-screen bg-[#0c0c0c] overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 overflow-auto p-4 md:p-6 flex flex-col gap-5">
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 <StatCard
@@ -174,10 +179,7 @@ export default function DashboardPage() {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
-                <WeeklyChart data={datosSemana} />
-                <FocusEngine />
-            </div>
+            <WeeklyChart data={datosSemana} />
 
             <div>
                 <div className="flex items-end justify-between mb-4">
@@ -219,6 +221,7 @@ export default function DashboardPage() {
                 </div>
                 <span className="text-[10px] text-neutral-800 font-mono">v2.4.0-ESTABLE // BUILD_200431</span>
             </footer>
+            </div>
         </div>
     );
 }
