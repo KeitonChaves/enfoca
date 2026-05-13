@@ -35,6 +35,8 @@ spring:
     enabled: true
     locations: classpath:db/migration
     out-of-order: true
+    baseline-on-migrate: true
+    baseline-version: 0
     # Perfil local agrega classpath:db/seeds para datos de prueba
 
   data:
