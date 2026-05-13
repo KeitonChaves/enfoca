@@ -54,6 +54,12 @@ export const profileService = {
     changePassword: (data) => api.put('/profile/password', data),
 };
 
+export const pomodoroService = {
+    iniciar: ()               => api.post('/pomodoro/sesiones/iniciar'),
+    completar: (id, duracion) => api.post(`/pomodoro/sesiones/${id}/completar`, { duracion }),
+    historial: ()             => api.get('/pomodoro/sesiones'),
+};
+
 export const planService = {
     crear: (data) => api.post('/planes-estudio', data),
     listar: () => api.get('/planes-estudio'),

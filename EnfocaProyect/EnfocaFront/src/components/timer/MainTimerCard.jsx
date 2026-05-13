@@ -1,9 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
+import { pomodoroService } from '../../services/api';
 
 export default function MainTimerCard() {
-    // 1. Estados de las fases (Agregamos 'PAUSED')
     const [phase, setPhase] = useState('IDLE'); // IDLE, PREPARING, RUNNING, PAUSED
     const [sessionId, setSessionId] = useState(null);
+    const duracionTranscurrida = useRef(0);
 
     // 2. Tiempos iniciales
     const initialPrepTime = 10; // Ajustado a 10s según tus requerimientos anteriores
@@ -21,7 +22,10 @@ export default function MainTimerCard() {
                 setPrepTimeLeft((prev) => {
                     if (prev <= 1) {
                         clearInterval(interval);
-                        // Aquí iría la llamada al backend: /begin
+                        pomodoroService.iniciar()
+                            .then((res) => setSessionId(res.data?.id ?? null))
+                            .catch(() => {});
+                        duracionTranscurrida.current = 0;
                         setPhase('RUNNING');
                         return 0;
                     }
@@ -39,10 +43,14 @@ export default function MainTimerCard() {
 
         if (phase === 'RUNNING') {
             interval = setInterval(() => {
+                duracionTranscurrida.current += 1;
                 setTimeLeft((prev) => {
                     if (prev <= 1) {
                         clearInterval(interval);
-                        setPhase('IDLE'); // Fin de sesión
+                        if (sessionId) {
+                            pomodoroService.completar(sessionId, duracionTranscurrida.current).catch(() => {});
+                        }
+                        setPhase('IDLE');
                         return 0;
                     }
                     return prev - 1;

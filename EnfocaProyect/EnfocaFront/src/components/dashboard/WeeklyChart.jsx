@@ -39,9 +39,9 @@ function smoothPath(points) {
     return d;
 }
 
-export default function WeeklyChart() {
+export default function WeeklyChart({ data: dataProp }) {
     const [mode, setMode] = useState('CRUDO');
-    const data = mode === 'CRUDO' ? RAW : W_AVG;
+    const data = dataProp ?? (mode === 'CRUDO' ? RAW : W_AVG);
 
     const points = data.map((d, i) => ({
         x: COL_W * i + COL_W / 2,

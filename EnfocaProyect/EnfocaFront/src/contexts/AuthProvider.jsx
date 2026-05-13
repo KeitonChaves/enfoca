@@ -58,7 +58,13 @@ export const AuthProvider = ({children}) => {
         }
     };
 
-    const logout = (callback) => {
+    const logout = async (callback) => {
+        try {
+            const refreshToken = localStorage.getItem('refresh_token');
+            if (refreshToken) await authService.logout(refreshToken);
+        } catch {
+            // ignorar errores del backend al cerrar sesión
+        }
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user_data');

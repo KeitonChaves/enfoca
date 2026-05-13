@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import StatCard from '../components/dashboard/StatCard';
 import WeeklyChart from '../components/dashboard/WeeklyChart';
 import FocusEngine from '../components/dashboard/FocusEngine';
 import CurriculumCard from '../components/dashboard/CurriculumCard';
+import { metricsService, planService } from '../services/api';
 
 const IconClock = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -44,75 +46,139 @@ const IconGlobe = () => (
     </svg>
 );
 
-const CURRICULUM = [
-    {
-        code: 'MTH-402',
-        title: 'Integración Multivariable',
-        efficiency: 75.0,
-        topic: 'Tema: Integrales triples en coordenadas esféricas y campos vectoriales.',
-        accent: 'violet',
-        icon: <IconSigma />,
-    },
-    {
-        code: 'BIO-612',
-        title: 'Edición Génica CRISPR',
-        efficiency: 42.8,
-        topic: 'Tema: Análisis de secuenciación molecular CAS9 y unión a objetivos.',
-        accent: 'emerald',
-        icon: <IconUpload />,
-    },
-    {
-        code: 'HIS-101',
-        title: 'Revolución Industrial',
-        efficiency: 88.2,
-        topic: 'Tema: Cambio socioeconómico y mecanización en la Europa del siglo XIX.',
-        accent: 'amber',
-        icon: <IconGlobe />,
-    },
-];
+const DIAS = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+
+function mapearDatosSemana(rawDias) {
+    if (!rawDias?.length) return null;
+    const hoy = new Date().getDay();
+    // getDay(): 0=DOM, 1=LUN... convertir a índice LUN=0
+    const indicHoy = hoy === 0 ? 6 : hoy - 1;
+    return rawDias.map((item, i) => ({
+        day: DIAS[i] || DIAS[i % 7],
+        cycles: item.ciclosEnfoque ?? item.focusCycles ?? item.cycles ?? 0,
+        current: i === indicHoy,
+    }));
+}
 
 export default function DashboardPage() {
+    const [resumen, setResumen] = useState(null);
+    const [datosSemana, setDatosSemana] = useState(null);
+    const [planes, setPlanes] = useState([]);
+    const [cargando, setCargando] = useState(true);
+
+    useEffect(() => {
+        const cargar = async () => {
+            try {
+                const [resSummary, resDias, resPlanes] = await Promise.allSettled([
+                    metricsService.getSummary(),
+                    metricsService.getLast7Days(),
+                    planService.listar(),
+                ]);
+
+                if (resSummary.status === 'fulfilled') setResumen(resSummary.value.data);
+                if (resDias.status === 'fulfilled') {
+                    const mapeado = mapearDatosSemana(resDias.value.data);
+                    if (mapeado) setDatosSemana(mapeado);
+                }
+                if (resPlanes.status === 'fulfilled') setPlanes(resPlanes.value.data ?? []);
+            } finally {
+                setCargando(false);
+            }
+        };
+        cargar();
+    }, []);
+
+    const CURRICULUM_FALLBACK = [
+        {
+            code: 'MTH-402',
+            title: 'Integración Multivariable',
+            efficiency: 75.0,
+            topic: 'Tema: Integrales triples en coordenadas esféricas y campos vectoriales.',
+            accent: 'violet',
+            icon: <IconSigma />,
+        },
+        {
+            code: 'BIO-612',
+            title: 'Edición Génica CRISPR',
+            efficiency: 42.8,
+            topic: 'Tema: Análisis de secuenciación molecular CAS9 y unión a objetivos.',
+            accent: 'emerald',
+            icon: <IconUpload />,
+        },
+        {
+            code: 'HIS-101',
+            title: 'Revolución Industrial',
+            efficiency: 88.2,
+            topic: 'Tema: Cambio socioeconómico y mecanización en la Europa del siglo XIX.',
+            accent: 'amber',
+            icon: <IconGlobe />,
+        },
+    ];
+
+    const ACCENTS = ['violet', 'emerald', 'amber'];
+
+    const curriculumItems = planes.length > 0
+        ? planes.slice(0, 3).map((p, i) => ({
+            code: p.id ? p.id.toString().slice(-6).toUpperCase() : String(i + 1).padStart(3, '0'),
+            title: p.titulo ?? p.title ?? 'Plan sin título',
+            efficiency: p.progreso?.porcentaje ?? p.progreso ?? p.progress ?? 0,
+            topic: p.objetivo ?? p.descripcion ?? p.description ?? '',
+            accent: ACCENTS[i % ACCENTS.length],
+            icon: <IconSigma />,
+        }))
+        : CURRICULUM_FALLBACK;
+
+    const horasEnfocadas = resumen?.horasEnfocadas ?? resumen?.focusHours ?? null;
+    const xpTotal = resumen?.xpTotal ?? resumen?.deepWorkXp ?? null;
+    const tasaRetencion = resumen?.tasaRetencion ?? resumen?.retentionRate ?? null;
+    const rachaActiva = resumen?.rachaActiva ?? resumen?.activeStreak ?? null;
+
+    if (cargando) {
+        return (
+            <div className="p-4 md:p-6 flex items-center justify-center h-full">
+                <div className="w-6 h-6 border-2 border-violet-600/30 border-t-violet-600 rounded-full animate-spin" />
+            </div>
+        );
+    }
+
     return (
         <div className="p-4 md:p-6 flex flex-col gap-5">
 
-            {/* Métricas */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 <StatCard
                     label="Horas Enfocadas"
-                    value="124.5"
-                    badge="+12%"
+                    value={horasEnfocadas !== null ? horasEnfocadas.toFixed(1) : '—'}
+                    badge={resumen?.variacionHoras ? `${resumen.variacionHoras > 0 ? '+' : ''}${resumen.variacionHoras}%` : undefined}
                     badgeColor="green"
                     icon={<IconClock />}
                 />
                 <StatCard
                     label="XP Trabajo Profundo"
-                    value="2.450"
-                    badge="NIV 24"
+                    value={xpTotal !== null ? xpTotal.toLocaleString('es-CL') : '—'}
+                    badge={resumen?.nivel ? `NIV ${resumen.nivel}` : undefined}
                     badgeColor="neutral"
                     icon={<IconTarget />}
                 />
                 <StatCard
                     label="Tasa de Retención"
-                    value="92"
-                    unit="%"
+                    value={tasaRetencion !== null ? tasaRetencion : '—'}
+                    unit={tasaRetencion !== null ? '%' : undefined}
                     icon={<IconLayers />}
                 />
                 <StatCard
                     label="Racha Activa"
-                    value="12"
-                    unit="DÍAS"
+                    value={rachaActiva !== null ? rachaActiva : '—'}
+                    unit={rachaActiva !== null ? 'DÍAS' : undefined}
                     icon={<IconBolt />}
                     accent="text-amber-400"
                 />
             </div>
 
-            {/* Gráfico + Motor */}
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
-                <WeeklyChart />
+                <WeeklyChart data={datosSemana} />
                 <FocusEngine />
             </div>
 
-            {/* Currículo activo */}
             <div>
                 <div className="flex items-end justify-between mb-4">
                     <div>
@@ -131,13 +197,12 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {CURRICULUM.map((c) => (
+                    {curriculumItems.map((c) => (
                         <CurriculumCard key={c.code} {...c} />
                     ))}
                 </div>
             </div>
 
-            {/* Footer */}
             <footer className="mt-2 pt-5 border-t border-neutral-900 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                     <div className="w-5 h-5 border border-neutral-700 rounded flex items-center justify-center">

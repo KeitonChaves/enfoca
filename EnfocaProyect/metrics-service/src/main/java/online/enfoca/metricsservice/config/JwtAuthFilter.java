@@ -2,6 +2,7 @@ package online.enfoca.metricsservice.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,9 +43,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             String token = authHeader.substring(7);
 
+            byte[] keyBytes;
+            try {
+                keyBytes = Decoders.BASE64.decode(jwtSecret);
+            } catch (Exception ex) {
+                keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+            }
+
             Claims claims = Jwts.parser()
-                    .verifyWith(Keys.hmacShaKeyFor(
-                            jwtSecret.getBytes(StandardCharsets.UTF_8)))
+                    .verifyWith(Keys.hmacShaKeyFor(keyBytes))
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();

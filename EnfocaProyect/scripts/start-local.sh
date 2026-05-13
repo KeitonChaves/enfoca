@@ -113,6 +113,18 @@ print_status() {
 mkdir -p "$LOG_DIR"
 printf "Logs y PID en: %s\n" "$LOG_DIR"
 
+# Cargar variables de entorno desde .env si existe
+ENV_FILE="$ROOT_DIR/.env"
+if [ -f "$ENV_FILE" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+  printf "Variables de entorno cargadas desde .env\n"
+else
+  printf "${YELLOW}Advertencia:${NC} no se encontró .env en %s\n" "$ROOT_DIR"
+fi
+
 # Validacion de Docker antes de iniciar contenedores
 DOCKER_ERR=$(docker info 2>&1)
 if [ $? -ne 0 ]; then
