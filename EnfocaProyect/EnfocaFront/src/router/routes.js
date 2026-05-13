@@ -9,72 +9,24 @@ import StudyPlanPage from '../pages/StudyPlanPage';
 import AnalyticsPage from '../pages/AnalyticsPage';
 import ChangePasswordPage from '../pages/ChangePasswordPage';
 import ResetPasswordPage from '../pages/ResetPasswordPage';
+import ProfilePage from '../pages/ProfilePage';
 
-// Rutas Públicas (Accesibles sin iniciar sesión)
 export const PUBLIC_ROUTES = [
-    {
-        path: '/',
-        element: LandingPage,
-        name: 'Inicio'
-    },
-    {
-        path: '/login',
-        element: LoginPage,
-        name: 'Login'
-    },
-    {
-        path: '/register',
-        element: RegisterPage,
-        name: 'Registro'
-    },
-    {
-        path: '/recover',
-        element: RecoverAccountPage,
-        name: 'Recuperar Cuenta'
-    },
-    {
-        path: '/reset-password',
-        element: ResetPasswordPage,
-        name: 'Restablecer Contraseña'
-    }
+    { path: '/',               element: LandingPage,        name: 'Inicio' },
+    { path: '/login',          element: LoginPage,           name: 'Login' },
+    { path: '/register',       element: RegisterPage,        name: 'Registro' },
+    { path: '/recover',        element: RecoverAccountPage,  name: 'Recuperar Cuenta' },
+    { path: '/reset-password', element: ResetPasswordPage,   name: 'Restablecer Contraseña' },
 ];
 
-// Rutas Privadas (Protegidas)
 export const PRIVATE_ROUTES = [
-    {
-        path: '/dashboard',
-        element: DashboardPage,
-        name: 'Dashboard'
-    },
-    {
-        path: '/pomodoro',
-        element: PomodoroPage,
-        name: 'Enfoque', // Vinculado al enlace del Navbar
-        icon: 'TimerIcon'
-    },
-    {
-        path: '/focus-mode',
-        element: FocusModePage,
-        name: 'Modo Deep Focus',
-        icon: 'FocusIcon'
-    },
-    {
-        path: '/study-plan',
-        element: StudyPlanPage,
-        name: 'Plan de Estudio',
-        icon: 'BookOpenIcon'
-    },
-    {
-        path: '/analytics',
-        element: AnalyticsPage,
-        name: 'Análisis',
-        icon: 'AnalyticsIcon'
-    },
-    {
-        path: '/settings/password',
-        element: ChangePasswordPage,
-        name: 'Cambiar Contraseña',
-    }
+    { path: '/dashboard',        element: DashboardPage,      name: 'Panel' },
+    { path: '/pomodoro',         element: PomodoroPage,       name: 'Modo Enfoque' },
+    { path: '/focus-mode',       element: FocusModePage,      name: 'Deep Focus' },
+    { path: '/study-plan',       element: StudyPlanPage,      name: 'Plan de Estudio' },
+    { path: '/analytics',        element: AnalyticsPage,      name: 'Análisis' },
+    { path: '/settings/password',element: ChangePasswordPage, name: 'Cambiar Contraseña' },
+    { path: '/profile',          element: ProfilePage,        name: 'Mi Perfil' },
 ];
 
 export const allRoutes = [...PUBLIC_ROUTES, ...PRIVATE_ROUTES];
