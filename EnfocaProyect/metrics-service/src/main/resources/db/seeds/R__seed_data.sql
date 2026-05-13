@@ -6,78 +6,78 @@ SET search_path TO metrics;
 -- DAILY SUMMARIES — usuario 1 (Felipe, muy activo) — 28 días
 -- ================================================================
 INSERT INTO daily_summaries (user_id, summary_date, focused_minutes, sessions_count, cycles_count) VALUES
-  (1,CURRENT_DATE-30, 50, 2,2),(1,CURRENT_DATE-29, 80, 2,3),
-  (1,CURRENT_DATE-28, 50, 1,2),(1,CURRENT_DATE-27, 50, 2,2),
-  (1,CURRENT_DATE-26, 50, 1,2),(1,CURRENT_DATE-25, 50, 1,2),
-  (1,CURRENT_DATE-24, 40, 1,1),(1,CURRENT_DATE-23, 50, 2,2),
-  (1,CURRENT_DATE-22, 25, 1,1),(1,CURRENT_DATE-21, 40, 1,1),
-  (1,CURRENT_DATE-20, 50, 1,2),(1,CURRENT_DATE-19, 50, 1,2),
-  (1,CURRENT_DATE-18, 25, 1,1),(1,CURRENT_DATE-17, 40, 1,1),
-  (1,CURRENT_DATE-16, 25, 1,1),(1,CURRENT_DATE-15, 50, 1,2),
-  (1,CURRENT_DATE-10, 25, 1,1),(1,CURRENT_DATE-9,  40, 1,1),
-  (1,CURRENT_DATE-8,  50, 1,2),(1,CURRENT_DATE-7,  25, 1,1),
-  (1,CURRENT_DATE-5,  25, 1,1),(1,CURRENT_DATE-3,  40, 1,1),
-  (1,CURRENT_DATE-2,  50, 1,2),(1,CURRENT_DATE-1, 100, 3,3)
+  (100,CURRENT_DATE-30, 50, 2,2),(100,CURRENT_DATE-29, 80, 2,3),
+  (100,CURRENT_DATE-28, 50, 1,2),(100,CURRENT_DATE-27, 50, 2,2),
+  (100,CURRENT_DATE-26, 50, 1,2),(100,CURRENT_DATE-25, 50, 1,2),
+  (100,CURRENT_DATE-24, 40, 1,1),(100,CURRENT_DATE-23, 50, 2,2),
+  (100,CURRENT_DATE-22, 25, 1,1),(100,CURRENT_DATE-21, 40, 1,1),
+  (100,CURRENT_DATE-20, 50, 1,2),(100,CURRENT_DATE-19, 50, 1,2),
+  (100,CURRENT_DATE-18, 25, 1,1),(100,CURRENT_DATE-17, 40, 1,1),
+  (100,CURRENT_DATE-16, 25, 1,1),(100,CURRENT_DATE-15, 50, 1,2),
+  (100,CURRENT_DATE-10, 25, 1,1),(100,CURRENT_DATE-9,  40, 1,1),
+  (100,CURRENT_DATE-8,  50, 1,2),(100,CURRENT_DATE-7,  25, 1,1),
+  (100,CURRENT_DATE-5,  25, 1,1),(100,CURRENT_DATE-3,  40, 1,1),
+  (100,CURRENT_DATE-2,  50, 1,2),(100,CURRENT_DATE-1, 100, 3,3)
 ON CONFLICT (user_id, summary_date) DO NOTHING;
 
 -- ================================================================
 -- DAILY SUMMARIES — usuario 2 (María, activa) — 22 días
 -- ================================================================
 INSERT INTO daily_summaries (user_id, summary_date, focused_minutes, sessions_count, cycles_count) VALUES
-  (2,CURRENT_DATE-28, 25, 1,1),(2,CURRENT_DATE-26, 40, 1,1),
-  (2,CURRENT_DATE-25, 25, 1,1),(2,CURRENT_DATE-24, 50, 1,2),
-  (2,CURRENT_DATE-22, 25, 1,1),(2,CURRENT_DATE-21, 40, 1,1),
-  (2,CURRENT_DATE-20, 25, 1,1),(2,CURRENT_DATE-18, 25, 1,1),
-  (2,CURRENT_DATE-17, 50, 1,2),(2,CURRENT_DATE-15, 25, 1,1),
-  (2,CURRENT_DATE-13, 40, 1,1),(2,CURRENT_DATE-11, 25, 1,1),
-  (2,CURRENT_DATE-9,  25, 1,1),(2,CURRENT_DATE-7,  50, 1,2),
-  (2,CURRENT_DATE-6,  25, 1,1),(2,CURRENT_DATE-5,  40, 1,1),
-  (2,CURRENT_DATE-4,  25, 1,1),(2,CURRENT_DATE-3,  25, 1,1),
-  (2,CURRENT_DATE-2,  50, 1,2),(2,CURRENT_DATE-1, 165, 4,5)
+  (101,CURRENT_DATE-28, 25, 1,1),(101,CURRENT_DATE-26, 40, 1,1),
+  (101,CURRENT_DATE-25, 25, 1,1),(101,CURRENT_DATE-24, 50, 1,2),
+  (101,CURRENT_DATE-22, 25, 1,1),(101,CURRENT_DATE-21, 40, 1,1),
+  (101,CURRENT_DATE-20, 25, 1,1),(101,CURRENT_DATE-18, 25, 1,1),
+  (101,CURRENT_DATE-17, 50, 1,2),(101,CURRENT_DATE-15, 25, 1,1),
+  (101,CURRENT_DATE-13, 40, 1,1),(101,CURRENT_DATE-11, 25, 1,1),
+  (101,CURRENT_DATE-9,  25, 1,1),(101,CURRENT_DATE-7,  50, 1,2),
+  (101,CURRENT_DATE-6,  25, 1,1),(101,CURRENT_DATE-5,  40, 1,1),
+  (101,CURRENT_DATE-4,  25, 1,1),(101,CURRENT_DATE-3,  25, 1,1),
+  (101,CURRENT_DATE-2,  50, 1,2),(101,CURRENT_DATE-1, 165, 4,5)
 ON CONFLICT (user_id, summary_date) DO NOTHING;
 
 -- ================================================================
 -- DAILY SUMMARIES — usuario 3 (Carlos, constante) — 20 días
 -- ================================================================
 INSERT INTO daily_summaries (user_id, summary_date, focused_minutes, sessions_count, cycles_count) VALUES
-  (3,CURRENT_DATE-25, 25, 1,1),(3,CURRENT_DATE-24, 40, 1,1),
-  (3,CURRENT_DATE-21, 50, 1,2),(3,CURRENT_DATE-20, 25, 1,1),
-  (3,CURRENT_DATE-17, 40, 1,1),(3,CURRENT_DATE-15, 25, 1,1),
-  (3,CURRENT_DATE-13, 50, 1,2),(3,CURRENT_DATE-11, 40, 1,1),
-  (3,CURRENT_DATE-9,  25, 1,1),(3,CURRENT_DATE-7,  25, 1,1),
-  (3,CURRENT_DATE-6,  50, 1,2),(3,CURRENT_DATE-4,  40, 1,1),
-  (3,CURRENT_DATE-3,  25, 1,1),(3,CURRENT_DATE-2,  25, 1,1),
-  (3,CURRENT_DATE-1, 175, 4,5)
+  (102,CURRENT_DATE-25, 25, 1,1),(102,CURRENT_DATE-24, 40, 1,1),
+  (102,CURRENT_DATE-21, 50, 1,2),(102,CURRENT_DATE-20, 25, 1,1),
+  (102,CURRENT_DATE-17, 40, 1,1),(102,CURRENT_DATE-15, 25, 1,1),
+  (102,CURRENT_DATE-13, 50, 1,2),(102,CURRENT_DATE-11, 40, 1,1),
+  (102,CURRENT_DATE-9,  25, 1,1),(102,CURRENT_DATE-7,  25, 1,1),
+  (102,CURRENT_DATE-6,  50, 1,2),(102,CURRENT_DATE-4,  40, 1,1),
+  (102,CURRENT_DATE-3,  25, 1,1),(102,CURRENT_DATE-2,  25, 1,1),
+  (102,CURRENT_DATE-1, 175, 4,5)
 ON CONFLICT (user_id, summary_date) DO NOTHING;
 
 -- ================================================================
 -- DAILY SUMMARIES — usuario 4 (Ana, activa últimas 3 semanas) — 20 días
 -- ================================================================
 INSERT INTO daily_summaries (user_id, summary_date, focused_minutes, sessions_count, cycles_count) VALUES
-  (4,CURRENT_DATE-20, 25, 1,1),(4,CURRENT_DATE-19, 40, 1,1),
-  (4,CURRENT_DATE-18, 25, 1,1),(4,CURRENT_DATE-17, 25, 1,1),
-  (4,CURRENT_DATE-16, 50, 1,2),(4,CURRENT_DATE-15, 25, 1,1),
-  (4,CURRENT_DATE-14, 40, 1,1),(4,CURRENT_DATE-13, 25, 1,1),
-  (4,CURRENT_DATE-12, 25, 1,1),(4,CURRENT_DATE-11, 50, 1,2),
-  (4,CURRENT_DATE-10, 25, 1,1),(4,CURRENT_DATE-9,  40, 1,1),
-  (4,CURRENT_DATE-7,  25, 1,1),(4,CURRENT_DATE-6,  50, 1,2),
-  (4,CURRENT_DATE-5,  25, 1,1),(4,CURRENT_DATE-4,  25, 1,1),
-  (4,CURRENT_DATE-3,  40, 1,1),(4,CURRENT_DATE-2,  25, 1,1),
-  (4,CURRENT_DATE-1, 165, 3,4)
+  (103,CURRENT_DATE-20, 25, 1,1),(103,CURRENT_DATE-19, 40, 1,1),
+  (103,CURRENT_DATE-18, 25, 1,1),(103,CURRENT_DATE-17, 25, 1,1),
+  (103,CURRENT_DATE-16, 50, 1,2),(103,CURRENT_DATE-15, 25, 1,1),
+  (103,CURRENT_DATE-14, 40, 1,1),(103,CURRENT_DATE-13, 25, 1,1),
+  (103,CURRENT_DATE-12, 25, 1,1),(103,CURRENT_DATE-11, 50, 1,2),
+  (103,CURRENT_DATE-10, 25, 1,1),(103,CURRENT_DATE-9,  40, 1,1),
+  (103,CURRENT_DATE-7,  25, 1,1),(103,CURRENT_DATE-6,  50, 1,2),
+  (103,CURRENT_DATE-5,  25, 1,1),(103,CURRENT_DATE-4,  25, 1,1),
+  (103,CURRENT_DATE-3,  40, 1,1),(103,CURRENT_DATE-2,  25, 1,1),
+  (103,CURRENT_DATE-1, 165, 3,4)
 ON CONFLICT (user_id, summary_date) DO NOTHING;
 
 -- ================================================================
 -- DAILY SUMMARIES — usuario 5 (Diego, muy activo últimas 2 semanas) — 20 días
 -- ================================================================
 INSERT INTO daily_summaries (user_id, summary_date, focused_minutes, sessions_count, cycles_count) VALUES
-  (5,CURRENT_DATE-15, 40, 1,1),(5,CURRENT_DATE-14, 25, 1,1),
-  (5,CURRENT_DATE-13, 25, 1,1),(5,CURRENT_DATE-12, 50, 1,2),
-  (5,CURRENT_DATE-11, 25, 1,1),(5,CURRENT_DATE-10, 40, 1,1),
-  (5,CURRENT_DATE-9,  25, 1,1),(5,CURRENT_DATE-8,  25, 1,1),
-  (5,CURRENT_DATE-7,  50, 1,2),(5,CURRENT_DATE-6,  25, 1,1),
-  (5,CURRENT_DATE-5,  40, 1,1),(5,CURRENT_DATE-4,  25, 1,1),
-  (5,CURRENT_DATE-3,  25, 1,1),(5,CURRENT_DATE-2,  50, 1,2),
-  (5,CURRENT_DATE-1, 240, 5,6)
+  (104,CURRENT_DATE-15, 40, 1,1),(104,CURRENT_DATE-14, 25, 1,1),
+  (104,CURRENT_DATE-13, 25, 1,1),(104,CURRENT_DATE-12, 50, 1,2),
+  (104,CURRENT_DATE-11, 25, 1,1),(104,CURRENT_DATE-10, 40, 1,1),
+  (104,CURRENT_DATE-9,  25, 1,1),(104,CURRENT_DATE-8,  25, 1,1),
+  (104,CURRENT_DATE-7,  50, 1,2),(104,CURRENT_DATE-6,  25, 1,1),
+  (104,CURRENT_DATE-5,  40, 1,1),(104,CURRENT_DATE-4,  25, 1,1),
+  (104,CURRENT_DATE-3,  25, 1,1),(104,CURRENT_DATE-2,  50, 1,2),
+  (104,CURRENT_DATE-1, 240, 5,6)
 ON CONFLICT (user_id, summary_date) DO NOTHING;
 
 -- ================================================================
