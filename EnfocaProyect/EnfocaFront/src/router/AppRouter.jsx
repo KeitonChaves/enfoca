@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { PUBLIC_ROUTES, PRIVATE_ROUTES } from './routes';
+import { PUBLIC_ROUTES, PRIVATE_ROUTES, FULLSCREEN_ROUTES } from './routes';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 import DashboardLayout from '../layouts/DashboardLayout';
@@ -28,6 +28,13 @@ export default function AppRouter() {
                         />
                     ))}
                 </Route>
+                {FULLSCREEN_ROUTES.map((route) => (
+                    <Route
+                        key={route.path}
+                        path={route.path}
+                        element={<route.element />}
+                    />
+                ))}
             </Route>
         </Routes>
     );

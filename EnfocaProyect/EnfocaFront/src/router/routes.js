@@ -23,7 +23,6 @@ export const PUBLIC_ROUTES = [
 export const PRIVATE_ROUTES = [
     { path: '/dashboard',         element: DashboardPage,      name: 'Panel' },
     { path: '/pomodoro',          element: PomodoroPage,       name: 'Modo Enfoque' },
-    { path: '/focus-mode',        element: FocusModePage,      name: 'Deep Focus' },
     { path: '/study-plan',        element: StudyPlanPage,      name: 'Plan de Estudio' },
     { path: '/library',           element: LibraryPage,        name: 'Biblioteca' },
     { path: '/analytics',         element: AnalyticsPage,      name: 'Análisis' },
@@ -31,4 +30,8 @@ export const PRIVATE_ROUTES = [
     { path: '/profile',           element: ProfilePage,        name: 'Mi Perfil' },
 ];
 
-export const allRoutes = [...PUBLIC_ROUTES, ...PRIVATE_ROUTES];
+export const FULLSCREEN_ROUTES = [
+    { path: '/focus-mode', element: FocusModePage, name: 'Deep Focus' },
+];
+
+export const allRoutes = [...PUBLIC_ROUTES, ...PRIVATE_ROUTES, ...FULLSCREEN_ROUTES];
