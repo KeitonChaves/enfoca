@@ -93,7 +93,24 @@ export default function GamificationPanel() {
         </div>
     );
 
-    if (error || !perfil) return null;
+    if (error || !perfil) return (
+        <section className="rounded-2xl border border-neutral-900 bg-[#0d0d0d] p-5 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-xs font-bold tracking-widest text-white uppercase">Progresión</h2>
+                    <p className="text-[10px] text-neutral-600 tracking-wider mt-0.5">Nivel · Racha · Logros</p>
+                </div>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-2 py-8">
+                <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center">
+                    <IconTrophy />
+                </div>
+                <p className="text-xs text-neutral-600 tracking-wider text-center">
+                    Gamificación no disponible
+                </p>
+            </div>
+        </section>
+    );
 
     const {
         nivel         = 1,

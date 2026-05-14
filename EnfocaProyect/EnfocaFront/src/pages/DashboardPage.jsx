@@ -6,8 +6,6 @@ import StatCard from '../components/dashboard/StatCard';
 import WeeklyChart from '../components/dashboard/WeeklyChart';
 import CurriculumCard from '../components/dashboard/CurriculumCard';
 import GamificationPanel from '../components/dashboard/GamificationPanel';
-import FocusEngine from '../components/dashboard/FocusEngine';
-import Sidebar from '../components/common/Sidebar';
 
 const IconClock = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -113,9 +111,7 @@ export default function DashboardPage() {
         : CURRICULUM_FALLBACK;
 
     return (
-        <div className="flex h-screen bg-[#0c0c0c] overflow-hidden">
-            <Sidebar />
-            <div className="flex-1 overflow-auto p-4 md:p-6 flex flex-col gap-5">
+        <div className="p-4 md:p-6 flex flex-col gap-5">
 
                 {/* StatCards */}
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -174,13 +170,10 @@ export default function DashboardPage() {
                     )}
                 </div>
 
-                {/* WeeklyChart + FocusEngine + GamificationPanel */}
+                {/* WeeklyChart + GamificationPanel */}
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
                     <WeeklyChart />
-                    <div className="flex flex-col gap-4">
-                        <FocusEngine />
-                        <GamificationPanel />
-                    </div>
+                    <GamificationPanel />
                 </div>
 
                 {/* Currículo Activo */}
@@ -206,7 +199,6 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-            </div>
         </div>
     );
 }
