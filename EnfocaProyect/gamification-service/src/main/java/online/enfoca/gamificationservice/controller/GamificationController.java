@@ -19,8 +19,15 @@ public class GamificationController {
 
     private final GamificationService gamificationService;
 
+    @GetMapping("/perfil")
+    @Operation(summary = "Perfil de gamificación del usuario autenticado")
+    public ResponseEntity<PerfilGamificacionDTO> obtenerPerfilPropio(
+            @RequestHeader("X-User-Id") String usuarioId) {
+        return ResponseEntity.ok(gamificationService.obtenerPerfil(usuarioId));
+    }
+
     @GetMapping("/{usuarioId}/perfil")
-    @Operation(summary = "Perfil de gamificación del usuario")
+    @Operation(summary = "Perfil de gamificación por ID de usuario")
     public ResponseEntity<PerfilGamificacionDTO> obtenerPerfil(@PathVariable String usuarioId) {
         return ResponseEntity.ok(gamificationService.obtenerPerfil(usuarioId));
     }

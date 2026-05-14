@@ -29,7 +29,7 @@ public class RouteConfiguration {
                 .route("ai-planes-route", r -> r.path("/planes-estudio/**")
                         .filters(f -> f.circuitBreaker(c -> c.setName("ai-service")))
                         .uri("lb://ai-service"))
-                .route("gamification-route", r -> r.path("/gamificacion/**")
+                .route("gamification-route", r -> r.path("/gamification/**")
                         .filters(f -> f.circuitBreaker(c -> c.setName("gamification-service")))
                         .uri("lb://gamification-service"))
                 .route("certification-route", r -> r.path("/certificacion/**")
