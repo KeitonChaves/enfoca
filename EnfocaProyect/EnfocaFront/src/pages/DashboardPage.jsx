@@ -1,14 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { useGamification } from '../hooks/useGamification.jsx';
+import { useMetrics } from '../hooks/useMetrics';
+import { usePlanes } from '../hooks/usePlanes';
 import StatCard from '../components/dashboard/StatCard';
 import WeeklyChart from '../components/dashboard/WeeklyChart';
 import CurriculumCard from '../components/dashboard/CurriculumCard';
+import GamificationPanel from '../components/dashboard/GamificationPanel';
+import FocusEngine from '../components/dashboard/FocusEngine';
 import Sidebar from '../components/common/Sidebar';
-import { metricsService, planService } from '../services/api';
 
 const IconClock = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="12" cy="12" r="10"/>
         <polyline points="12 6 12 12 16 14" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+);
+const IconTarget = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="12" cy="12" r="10"/>
+        <circle cx="12" cy="12" r="6"/>
+        <circle cx="12" cy="12" r="2"/>
     </svg>
 );
 const IconStar = () => (
@@ -34,39 +45,35 @@ const IconBook = () => (
         <line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/>
     </svg>
 );
-const IconMicroscope = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M6 18h8"/><path d="M3 21h18"/>
-        <path d="M14 21v-4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v4"/>
-        <path d="M14 7l2-2-5-5-2 2"/>
-        <path d="M9 12l5-5"/>
-        <path d="M13 7l4 4-3.5 3.5"/>
-        <circle cx="8.5" cy="15.5" r=".5" fill="currentColor"/>
-    </svg>
-);
-const IconHistory = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <circle cx="12" cy="12" r="9"/>
-        <line x1="3.05" y1="9" x2="20.95" y2="9"/><line x1="3.05" y1="15" x2="20.95" y2="15"/>
-        <path d="M12 3a14.5 14.5 0 0 1 0 18 14.5 14.5 0 0 1 0-18"/>
-    </svg>
+
+const Skeleton = ({ className }) => (
+    <div className={`bg-neutral-800/60 rounded animate-pulse ${className}`} />
 );
 
+const StatCardSkeleton = () => (
+    <div className="rounded-xl border border-neutral-900 bg-neutral-950 p-4 flex flex-col gap-3">
+        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-7 w-16" />
+        <Skeleton className="h-3 w-10" />
+    </div>
+);
 
-const DIAS = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+const CurriculumCardSkeleton = () => (
+    <div className="rounded-xl border border-neutral-900 bg-neutral-950 p-4 flex flex-col gap-3 animate-pulse">
+        <div className="flex items-center gap-2">
+            <Skeleton className="h-6 w-6 rounded" />
+            <Skeleton className="h-3 w-16" />
+        </div>
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-1.5 w-full rounded-full" />
+    </div>
+);
 
-function mapearDatosSemana(rawDias) {
-    if (!rawDias?.length) return null;
-    const hoy     = new Date().getDay();
-    const indicHoy = hoy === 0 ? 6 : hoy - 1;
-    const semana  = DIAS.map((day, i) => ({ day, cycles: 0, current: i === indicHoy }));
-    rawDias.forEach(item => {
-        const fecha   = new Date(item.date + 'T00:00:00');
-        const diaSem  = fecha.getDay();
-        const indice  = diaSem === 0 ? 6 : diaSem - 1;
-        semana[indice].cycles = item.sessionsCount ?? 0;
-    });
-    return semana;
+const ACCENTS = ['violet', 'emerald', 'amber'];
+
+function accentFromIndex(i) {
+    return ACCENTS[i % ACCENTS.length];
 }
 
 const calcularEficiencia = (plan) => {
@@ -77,150 +84,127 @@ const calcularEficiencia = (plan) => {
     return Math.round((done / total) * 100);
 };
 
+const CURRICULUM_FALLBACK = [
+    { code: 'MTH-402', title: 'Integración Multivariable',    efficiency: 75.0, topic: 'Integrales triples en coordenadas esféricas y campos vectoriales.',        accent: 'violet',  icon: <IconBook /> },
+    { code: 'BIO-612', title: 'Edición Génica CRISPR',        efficiency: 42.8, topic: 'Análisis de secuenciación molecular CAS9 y unión a objetivos.',             accent: 'emerald', icon: <IconBook /> },
+    { code: 'HIS-101', title: 'Revolución Industrial',        efficiency: 88.2, topic: 'Cambio socioeconómico y mecanización en la Europa del siglo XIX.',          accent: 'amber',   icon: <IconBook /> },
+];
+
 export default function DashboardPage() {
-    const [resumen, setResumen] = useState(null);
-    const [datosSemana, setDatosSemana] = useState(null);
-    const [planes, setPlanes] = useState([]);
-    const [cargando, setCargando] = useState(true);
+    const { perfil,  loading: loadingGam }     = useGamification();
+    const { summary, loading: loadingMetrics } = useMetrics();
+    const { planes,  loading: loadingPlanes }  = usePlanes();
 
-    useEffect(() => {
-        const cargar = async () => {
-            try {
-                const [resSummary, resDias, resPlanes] = await Promise.allSettled([
-                    metricsService.getSummary(),
-                    metricsService.getLast7Days(),
-                    planService.listar(),
-                ]);
-
-                if (resSummary.status === 'fulfilled') setResumen(resSummary.value.data);
-                if (resDias.status === 'fulfilled') {
-                    const mapeado = mapearDatosSemana(resDias.value.data);
-                    if (mapeado) setDatosSemana(mapeado);
-                }
-                if (resPlanes.status === 'fulfilled') setPlanes(resPlanes.value.data ?? []);
-            } finally {
-                setCargando(false);
-            }
-        };
-        cargar();
-    }, []);
-
-    const CURRICULUM_FALLBACK = [
-        {
-            code: 'MTH-402',
-            title: 'Integración Multivariable',
-            efficiency: 75.0,
-            topic: 'Tema: Integrales triples en coordenadas esféricas y campos vectoriales.',
-            accent: 'violet',
-            icon: <IconBook />,
-        },
-        {
-            code: 'BIO-612',
-            title: 'Edición Génica CRISPR',
-            efficiency: 42.8,
-            topic: 'Tema: Análisis de secuenciación molecular CAS9 y unión a objetivos.',
-            accent: 'emerald',
-            icon: <IconMicroscope />,
-        },
-        {
-            code: 'HIS-101',
-            title: 'Revolución Industrial',
-            efficiency: 88.2,
-            topic: 'Tema: Cambio socioeconómico y mecanización en la Europa del siglo XIX.',
-            accent: 'amber',
-            icon: <IconHistory />,
-        },
-    ];
-
-    const ACCENTS = ['violet', 'emerald', 'amber'];
+    const horasEnfocadas = summary?.focusedMinutesTotal != null
+        ? (summary.focusedMinutesTotal / 60).toFixed(1)
+        : null;
+    const tasaRetencion = summary?.retentionRate ?? null;
+    const rachaActiva   = summary?.currentStreak ?? null;
 
     const curriculumItems = planes.length > 0
         ? planes.slice(0, 3).map((p, i) => ({
-            code: p.id ? p.id.toString().slice(-6).toUpperCase() : String(i + 1).padStart(3, '0'),
-            title: p.titulo ?? 'Plan sin título',
+            code:       p.id ? p.id.toString().slice(-6).toUpperCase() : String(i + 1).padStart(3, '0'),
+            title:      p.titulo ?? 'Plan sin título',
             efficiency: calcularEficiencia(p),
-            topic: p.objetivo ?? p.nivel ?? '',
-            accent: ACCENTS[i % ACCENTS.length],
-            icon: <IconBook />,
+            topic:      p.objetivo ?? p.nivel ?? '',
+            accent:     accentFromIndex(i),
+            icon:       <IconBook />,
         }))
         : CURRICULUM_FALLBACK;
-
-    const horasEnfocadas = resumen?.focusedMinutesTotal != null
-        ? (resumen.focusedMinutesTotal / 60).toFixed(1)
-        : null;
-    const tasaRetencion = resumen?.retentionRate ?? null;
-    const rachaActiva   = resumen?.currentStreak ?? null;
-
-    if (cargando) {
-        return (
-            <div className="flex h-screen bg-[#0c0c0c]">
-                <Sidebar />
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="w-6 h-6 border-2 border-violet-600/30 border-t-violet-600 rounded-full animate-spin" />
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="flex h-screen bg-[#0c0c0c] overflow-hidden">
             <Sidebar />
             <div className="flex-1 overflow-auto p-4 md:p-6 flex flex-col gap-5">
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                <StatCard
-                    label="Horas Enfocadas"
-                    value={horasEnfocadas ?? '—'}
-                    unit={horasEnfocadas != null ? 'HRS' : undefined}
-                    badge={resumen?.focusedMinutesWeek != null ? `${(resumen.focusedMinutesWeek / 60).toFixed(1)}h semana` : undefined}
-                    badgeColor="green"
-                    icon={<IconClock />}
-                    accent="text-violet-400"
-                />
-                <StatCard
-                    label="Sesiones Hoy"
-                    value={resumen?.sessionsToday ?? '—'}
-                    unit={resumen?.sessionsToday != null ? 'HOY' : undefined}
-                    badge={resumen?.focusedMinutesToday != null ? `${resumen.focusedMinutesToday} min` : undefined}
-                    badgeColor="neutral"
-                    icon={<IconStar />}
-                    accent="text-yellow-400"
-                />
-                <StatCard
-                    label="Tasa de Retención"
-                    value={tasaRetencion != null ? tasaRetencion.toFixed(1) : '—'}
-                    unit={tasaRetencion != null ? '%' : undefined}
-                    icon={<IconShield />}
-                    accent="text-emerald-400"
-                />
-                <StatCard
-                    label="Racha Activa"
-                    value={rachaActiva ?? '—'}
-                    unit={rachaActiva != null ? 'DÍAS' : undefined}
-                    badge={resumen?.longestStreak != null ? `Récord: ${resumen.longestStreak}d` : undefined}
-                    icon={<IconFire />}
-                    accent="text-orange-400"
-                />
-            </div>
-
-            <div className="mt-2">
-                <WeeklyChart data={datosSemana} />
-            </div>
-
-            <div className="mt-4">
-                <div className="mb-4">
-                    <h2 className="text-sm font-bold tracking-widest text-white uppercase">Currículo Activo</h2>
-                    <p className="text-xs text-neutral-500 tracking-wider mt-0.5">
-                        Planes de estudio principales y progreso modular
-                    </p>
+                {/* StatCards */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    {loadingMetrics || loadingGam ? (
+                        <>
+                            <StatCardSkeleton />
+                            <StatCardSkeleton />
+                            <StatCardSkeleton />
+                            <StatCardSkeleton />
+                            <StatCardSkeleton />
+                        </>
+                    ) : (
+                        <>
+                            <StatCard
+                                label="Horas Enfocadas"
+                                value={horasEnfocadas ?? '—'}
+                                unit={horasEnfocadas != null ? 'HRS' : undefined}
+                                badge={summary?.focusedMinutesWeek != null ? `${(summary.focusedMinutesWeek / 60).toFixed(1)}h semana` : undefined}
+                                badgeColor="green"
+                                icon={<IconClock />}
+                                accent="text-violet-400"
+                            />
+                            <StatCard
+                                label="XP Trabajo Profundo"
+                                value={perfil ? perfil.xpTotal.toLocaleString('es-CL') : '—'}
+                                badge={perfil ? `NIV ${perfil.nivel}` : undefined}
+                                badgeColor="neutral"
+                                icon={<IconTarget />}
+                                accent="text-violet-400"
+                            />
+                            <StatCard
+                                label="Sesiones Hoy"
+                                value={summary?.sessionsToday ?? '—'}
+                                unit={summary?.sessionsToday != null ? 'HOY' : undefined}
+                                badge={summary?.focusedMinutesToday != null ? `${summary.focusedMinutesToday} min` : undefined}
+                                badgeColor="neutral"
+                                icon={<IconStar />}
+                                accent="text-yellow-400"
+                            />
+                            <StatCard
+                                label="Tasa de Retención"
+                                value={tasaRetencion != null ? tasaRetencion.toFixed(1) : '—'}
+                                unit={tasaRetencion != null ? '%' : undefined}
+                                icon={<IconShield />}
+                                accent="text-emerald-400"
+                            />
+                            <StatCard
+                                label="Racha Activa"
+                                value={rachaActiva ?? '—'}
+                                unit={rachaActiva != null ? 'DÍAS' : undefined}
+                                badge={summary?.longestStreak != null ? `Récord: ${summary.longestStreak}d` : undefined}
+                                icon={<IconFire />}
+                                accent="text-orange-400"
+                            />
+                        </>
+                    )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {curriculumItems.map((c) => (
-                        <CurriculumCard key={c.code} {...c} />
-                    ))}
+                {/* WeeklyChart + FocusEngine + GamificationPanel */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
+                    <WeeklyChart />
+                    <div className="flex flex-col gap-4">
+                        <FocusEngine />
+                        <GamificationPanel />
+                    </div>
                 </div>
-            </div>
+
+                {/* Currículo Activo */}
+                <div>
+                    <div className="mb-4">
+                        <h2 className="text-sm font-bold tracking-widest text-white uppercase">Currículo Activo</h2>
+                        <p className="text-xs text-neutral-500 tracking-wider mt-0.5">
+                            Planes de estudio principales y progreso modular
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {loadingPlanes ? (
+                            <>
+                                <CurriculumCardSkeleton />
+                                <CurriculumCardSkeleton />
+                                <CurriculumCardSkeleton />
+                            </>
+                        ) : (
+                            curriculumItems.map((c) => (
+                                <CurriculumCard key={c.code} {...c} />
+                            ))
+                        )}
+                    </div>
+                </div>
 
             </div>
         </div>
