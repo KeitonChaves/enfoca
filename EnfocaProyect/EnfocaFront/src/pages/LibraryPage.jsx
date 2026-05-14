@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { planService } from '../services/api';
-import Sidebar from '../components/common/Sidebar';
+
 
 const AUTORES_MOCK = ['Alex M.', 'Sarah K.', 'David L.', 'María R.'];
 const BG_MOCK      = ['from-amber-900/40', 'from-blue-900/40', 'from-emerald-900/40', 'from-orange-900/40'];
@@ -42,10 +42,7 @@ export default function LibraryPage() {
     const planesToMostrar = catalogo.length > 0 ? catalogo : null;
 
     return (
-        <div className="flex h-screen bg-[#0c0c0c] overflow-hidden">
-            <Sidebar />
-
-            <div className="flex-1 overflow-auto p-4 md:p-8 flex flex-col gap-8">
+        <div className="p-4 md:p-8 flex flex-col gap-8">
 
                 {/* Comunidad */}
                 <section className="flex flex-col gap-5">
@@ -130,7 +127,6 @@ export default function LibraryPage() {
                         </div>
                     )}
                 </section>
-            </div>
         </div>
     );
 }

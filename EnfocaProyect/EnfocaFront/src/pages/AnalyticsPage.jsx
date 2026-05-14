@@ -1,7 +1,7 @@
 import './AnalyticsPage.css';
 import { metricsService } from '../services/api.jsx';
 import { useEffect, useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
+
 import {
     AreaChart, Area, BarChart, Bar,
     XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
@@ -80,15 +80,12 @@ export default function AnalyticsPage() {
     }, []);
 
     if (loading) return (
-        <div className="flex h-screen bg-[#0c0c0c]">
-            <Sidebar />
-            <div className="flex-1 p-6 flex flex-col gap-4">
-                <div className="skeleton skeleton-heading" />
-                <div className="flex gap-4">
-                    {[1,2,3,4].map(i => <div key={i} className="skeleton skeleton-kpi flex-1" />)}
-                </div>
-                <div className="skeleton skeleton-chart flex-1" />
+        <div className="p-6 flex flex-col gap-4">
+            <div className="skeleton skeleton-heading" />
+            <div className="flex gap-4">
+                {[1,2,3,4].map(i => <div key={i} className="skeleton skeleton-kpi flex-1" />)}
             </div>
+            <div className="skeleton skeleton-chart flex-1" />
         </div>
     );
 
@@ -96,9 +93,7 @@ export default function AnalyticsPage() {
     const hoursWeek  = summary ? (summary.focusedMinutesWeek  / 60).toFixed(1) : '—';
 
     return (
-        <div className="flex h-screen bg-[#0c0c0c] overflow-hidden">
-            <Sidebar />
-            <div className="flex-1 overflow-auto p-6 flex flex-col gap-4">
+        <div className="p-6 flex flex-col gap-4">
 
                 {/* Encabezado */}
                 <div>
@@ -194,7 +189,6 @@ export default function AnalyticsPage() {
                     </div>
                 </div>
 
-            </div>
         </div>
     );
 }

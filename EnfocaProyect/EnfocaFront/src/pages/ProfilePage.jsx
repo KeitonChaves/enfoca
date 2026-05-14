@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import Sidebar from '../components/common/Sidebar';
+
 import { profileService } from '../services/api';
 
 const IconEye = ({ open }) => open ? (
@@ -126,9 +126,7 @@ export default function ProfilePage() {
     const initial   = firstName.charAt(0).toUpperCase();
 
     return (
-        <div className="flex h-screen bg-[#0c0c0c] overflow-hidden">
-            <Sidebar />
-            <div className="flex-1 overflow-auto p-6 md:p-8">
+        <div className="overflow-auto p-6 md:p-8">
                 <div className="max-w-xl mx-auto flex flex-col gap-8">
 
                     {/* Avatar + nombre */}
@@ -212,7 +210,6 @@ export default function ProfilePage() {
 
 
                 </div>
-            </div>
         </div>
     );
 }

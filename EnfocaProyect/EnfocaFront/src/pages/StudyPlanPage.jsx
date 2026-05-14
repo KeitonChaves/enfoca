@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { planService } from '../services/api';
-import Sidebar from '../components/common/Sidebar';
+
 
 const TIME_OPTIONS = [
     { value: '2 horas', label: '2 Horas (Liviano)' },
@@ -169,9 +169,7 @@ export default function StudyPlanPage() {
     const planMostrado = planSeleccionado || planActual;
 
     return (
-        <div className="flex h-screen bg-[#0c0c0c] overflow-hidden">
-            <Sidebar />
-            <div className="flex-1 overflow-auto p-4 md:p-6 flex flex-col gap-8">
+        <div className="p-4 md:p-6 flex flex-col gap-8">
 
             {/* Header */}
             <div>
@@ -456,7 +454,6 @@ export default function StudyPlanPage() {
                 </div>
             )}
 
-            </div>
         </div>
     );
 }
