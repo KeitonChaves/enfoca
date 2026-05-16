@@ -11,6 +11,7 @@ import ChangePasswordPage from '../pages/ChangePasswordPage';
 import ResetPasswordPage from '../pages/ResetPasswordPage';
 import ProfilePage from '../pages/ProfilePage';
 import LibraryPage from '../pages/LibraryPage';
+import WeeklyCalendarPage from "../pages/WeeklyCalendarPage.jsx";
 
 export const PUBLIC_ROUTES = [
     { path: '/',               element: LandingPage,        name: 'Inicio' },
@@ -28,6 +29,8 @@ export const PRIVATE_ROUTES = [
     { path: '/analytics',         element: AnalyticsPage,      name: 'Análisis' },
     { path: '/settings/password', element: ChangePasswordPage, name: 'Cambiar Contraseña' },
     { path: '/profile',           element: ProfilePage,        name: 'Mi Perfil' },
+    { path: '/calendar',          element: WeeklyCalendarPage, name: 'Calendario Semanal'}
+
 ];
 
 export const FULLSCREEN_ROUTES = [

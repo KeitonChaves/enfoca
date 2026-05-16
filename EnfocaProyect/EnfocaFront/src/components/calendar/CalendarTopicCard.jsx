@@ -1,0 +1,68 @@
+// src/components/calendar/CalendarTopicCard.jsx
+import React from 'react';
+import { CheckCircle2, CircleDashed, Clock } from 'lucide-react';
+
+export default function CalendarTopicCard({ topic, onClick }) {
+    // Determinamos el estado visual del tema
+    const isCompleted = topic.completado;
+    const isPending = !isCompleted && topic.pomodorosCompletados === 0;
+    const isInProgress = !isCompleted && topic.pomodorosCompletados > 0;
+
+    // Clases dinámicas según el estado
+    let stateClasses = "";
+    let Icon = Clock;
+    let iconColor = "";
+
+    if (isCompleted) {
+        stateClasses = "bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800/50";
+        Icon = CheckCircle2;
+        iconColor = "text-green-500";
+    } else if (isPending) {
+        stateClasses = "bg-transparent border-dashed border-neutral-300 dark:border-neutral-700 opacity-70";
+        Icon = CircleDashed;
+        iconColor = "text-neutral-400";
+    } else if (isInProgress) {
+        stateClasses = "bg-white dark:bg-neutral-900 border-violet-200 dark:border-violet-800/50 shadow-sm";
+        Icon = Clock;
+        iconColor = "text-violet-500";
+    }
+
+    return (
+        <button
+            onClick={() => onClick(topic)}
+            className={`w-full text-left p-2.5 rounded-lg border transition-all hover:shadow-md cursor-pointer group flex flex-col gap-1.5 ${stateClasses}`}
+        >
+            <div className="flex items-start justify-between gap-2">
+                <h4 className={`text-xs font-medium leading-tight line-clamp-2 ${isCompleted ? 'text-green-800 dark:text-green-300' : 'text-neutral-800 dark:text-neutral-200'}`}>
+                    {topic.titulo}
+                </h4>
+                <Icon className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${iconColor}`} />
+            </div>
+
+            <div className="flex items-center justify-between mt-1">
+                <span className="text-[9px] font-mono uppercase tracking-wider text-neutral-500 truncate max-w-[80%]">
+                    {topic.moduloTitulo}
+                </span>
+
+                {/* Indicador de Pomodoros (Ej: 2/4) */}
+                <span className={`text-[10px] font-mono px-1.5 rounded ${
+                    isCompleted
+                        ? 'bg-green-100 dark:bg-green-800/30 text-green-700 dark:text-green-400'
+                        : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
+                }`}>
+                    {topic.pomodorosCompletados}/{topic.pomodorosEstimados}
+                </span>
+            </div>
+
+            {/* Barra de progreso sutil si está en curso */}
+            {isInProgress && (
+                <div className="w-full h-1 bg-neutral-100 dark:bg-neutral-800 rounded-full mt-1 overflow-hidden">
+                    <div
+                        className="h-full bg-violet-500 rounded-full"
+                        style={{ width: `${(topic.pomodorosCompletados / topic.pomodorosEstimados) * 100}%` }}
+                    ></div>
+                </div>
+            )}
+        </button>
+    );
+}

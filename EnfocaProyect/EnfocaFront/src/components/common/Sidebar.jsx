@@ -48,12 +48,22 @@ const IconLogout = () => (
     </svg>
 );
 
+const IconCalendar = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+);
+
 const menuItems = [
     { name: 'Panel',           path: '/dashboard',  icon: <IconDashboard /> },
     { name: 'Plan de Estudio', path: '/study-plan', icon: <IconBook /> },
     { name: 'Biblioteca',      path: '/library',    icon: <IconLibrary /> },
     { name: 'Análisis',        path: '/analytics',  icon: <IconChart /> },
     { name: 'Deep Focus',      path: '/focus-mode', icon: <IconFocus /> },
+    { name: 'Calendario',      path: '/calendar',   icon: <IconCalendar/>}
 ];
 
 export default function Sidebar() {
