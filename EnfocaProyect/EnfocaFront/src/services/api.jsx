@@ -77,4 +77,8 @@ export const gamificationService = {
     getPerfil: ()          => api.get('/gamification/perfil'),
 };
 
+export const calendarService = {
+    semana: (fechaInicio, fechaFin) => api.get('/calendario/semana', { params: { fechaInicio, fechaFin } }),
+};
+
 export default api;

@@ -107,128 +107,126 @@ export default function PomodoroPage() {
     const planProgress    = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
 
     return (
-        <MainLayout>
-            <div className="h-full flex flex-col text-white font-sans selection:bg-violet-500/30">
+        <div className="h-full flex flex-col p-4 md:p-6 lg:p-8 text-white font-sans selection:bg-violet-500/30">
 
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-neutral-800 pb-2 mb-4">
-                    <h1 className="text-[10px] font-mono text-neutral-400 tracking-widest uppercase">
-                        Active_Terminal
-                    </h1>
-                    <div className="hidden md:flex gap-4 text-[10px] font-mono tracking-widest uppercase">
-                        <span className="text-violet-400 cursor-pointer">Focus_Session</span>
-                    </div>
-                </div>
-
-                {/* Grilla principal */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start flex-grow">
-
-                    {/* Columna izquierda */}
-                    <div className="lg:col-span-8 flex flex-col gap-4">
-
-                        <MainTimerCard
-                            autoOpenConfig={autoOpenConfig}
-                            onComplete={() => setSesionCompleta(true)}
-                        />
-
-                        {sesionCompleta && (
-                            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-5 py-3">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round">
-                                    <polyline points="20 6 9 17 4 12"/>
-                                </svg>
-                                <span className="text-sm text-emerald-400 font-semibold">¡Sesión completada!</span>
-                            </div>
-                        )}
-
-                    </div>
-
-                    {/* Columna derecha — Plan de estudio */}
-                    <div className="lg:col-span-4 flex flex-col gap-5 self-stretch">
-
-                        {/* Panel de temario */}
-                        <div className="bg-[#0c0c0c] border border-neutral-800 rounded-2xl p-4 flex flex-col flex-grow lg:h-0 lg:min-h-0 overflow-hidden">
-
-                            {plan ? (
-                                <>
-                                    {/* Cabecera */}
-                                    <div className="flex items-start justify-between mb-3 flex-shrink-0 gap-2">
-                                        <div className="min-w-0">
-                                            <p className="text-xs text-neutral-500 tracking-widest uppercase mb-1">
-                                                Temario · Sesión activa
-                                            </p>
-                                            <h2 className="text-base font-bold text-white leading-tight truncate">
-                                                {plan.titulo}
-                                            </h2>
-                                            <p className="text-xs text-neutral-600 mt-0.5">
-                                                {plan.modulos?.length ?? 0} módulos · {totalTopics} temas
-                                            </p>
-                                        </div>
-                                        <button
-                                            onClick={() => navigate('/study-plan')}
-                                            className="flex-shrink-0 text-[9px] text-neutral-600 hover:text-violet-400 transition-colors font-mono uppercase tracking-wider"
-                                            title="Ir a Plan de Estudio"
-                                        >
-                                            ←
-                                        </button>
-                                    </div>
-
-                                    {/* Lista de módulos */}
-                                    <div className="flex-grow overflow-y-auto pr-0.5 min-h-0 flex flex-col gap-0.5">
-                                        {plan.modulos?.map(modulo => (
-                                            <ModuleItem
-                                                key={modulo.id}
-                                                modulo={modulo}
-                                                onToggle={toggleTopic}
-                                            />
-                                        ))}
-                                    </div>
-
-                                    {/* Barra de progreso del plan */}
-                                    <div className="mt-3 flex-shrink-0 border-t border-neutral-800/60 pt-3">
-                                        <div className="flex justify-between text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
-                                            <span>Avance</span>
-                                            <span>{completedTopics}/{totalTopics} · {planProgress}%</span>
-                                        </div>
-                                        <div className="h-1 w-full bg-neutral-800 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-violet-600 rounded-full transition-all duration-300"
-                                                style={{ width: `${planProgress}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    {/* Sin plan — placeholder original */}
-                                    <div className="flex items-center justify-between mb-4 flex-shrink-0">
-                                        <h2 className="text-[9px] font-mono text-neutral-400 tracking-widest uppercase">Job_Queue</h2>
-                                        <button
-                                            onClick={() => navigate('/study-plan')}
-                                            className="w-5 h-5 rounded border border-neutral-700 flex items-center justify-center text-xs text-neutral-400 hover:bg-neutral-800 transition-colors"
-                                            title="Ir a Plan de Estudio"
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-                                    <div className="space-y-3 overflow-y-auto pr-1 flex-grow min-h-0">
-                                        <div className="border border-neutral-700 bg-neutral-900/30 p-3 rounded-xl flex gap-3">
-                                            <div className="w-3.5 h-3.5 rounded border border-violet-500 bg-violet-500/20 mt-0.5"></div>
-                                            <h3 className="text-xs font-medium text-neutral-200">Cognitive Psychology Review</h3>
-                                        </div>
-                                    </div>
-                                    <div className="mt-4 border border-neutral-800 p-3 rounded-xl bg-black/50 flex-shrink-0">
-                                        <p className="text-[10px] font-mono text-neutral-500 italic leading-tight">
-                                            "// Focus is the new IQ."
-                                        </p>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-
-
-                    </div>
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-2 mb-4">
+                <h1 className="text-[10px] font-mono text-neutral-400 tracking-widest uppercase">
+                    Active_Terminal
+                </h1>
+                <div className="hidden md:flex gap-4 text-[10px] font-mono tracking-widest uppercase">
+                    <span className="text-violet-400 cursor-pointer">Focus_Session</span>
                 </div>
             </div>
-        </MainLayout>
+
+            {/* Grilla principal */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start flex-grow">
+
+                {/* Columna izquierda */}
+                <div className="lg:col-span-8 flex flex-col gap-4">
+
+                    <MainTimerCard
+                        autoOpenConfig={autoOpenConfig}
+                        onComplete={() => setSesionCompleta(true)}
+                    />
+
+                    {sesionCompleta && (
+                        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-5 py-3">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span className="text-sm text-emerald-400 font-semibold">¡Sesión completada!</span>
+                        </div>
+                    )}
+
+                </div>
+
+                {/* Columna derecha — Plan de estudio */}
+                <div className="lg:col-span-4 flex flex-col gap-5 self-stretch">
+
+                    {/* Panel de temario */}
+                    <div className="bg-[#0c0c0c] border border-neutral-800 rounded-2xl p-4 flex flex-col flex-grow lg:h-0 lg:min-h-0 overflow-hidden">
+
+                        {plan ? (
+                            <>
+                                {/* Cabecera */}
+                                <div className="flex items-start justify-between mb-3 flex-shrink-0 gap-2">
+                                    <div className="min-w-0">
+                                        <p className="text-xs text-neutral-500 tracking-widest uppercase mb-1">
+                                            Temario · Sesión activa
+                                        </p>
+                                        <h2 className="text-base font-bold text-white leading-tight truncate">
+                                            {plan.titulo}
+                                        </h2>
+                                        <p className="text-xs text-neutral-600 mt-0.5">
+                                            {plan.modulos?.length ?? 0} módulos · {totalTopics} temas
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => navigate('/study-plan')}
+                                        className="flex-shrink-0 text-[9px] text-neutral-600 hover:text-violet-400 transition-colors font-mono uppercase tracking-wider"
+                                        title="Ir a Plan de Estudio"
+                                    >
+                                        ←
+                                    </button>
+                                </div>
+
+                                {/* Lista de módulos */}
+                                <div className="flex-grow overflow-y-auto pr-0.5 min-h-0 flex flex-col gap-0.5">
+                                    {plan.modulos?.map(modulo => (
+                                        <ModuleItem
+                                            key={modulo.id}
+                                            modulo={modulo}
+                                            onToggle={toggleTopic}
+                                        />
+                                    ))}
+                                </div>
+
+                                {/* Barra de progreso del plan */}
+                                <div className="mt-3 flex-shrink-0 border-t border-neutral-800/60 pt-3">
+                                    <div className="flex justify-between text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+                                        <span>Avance</span>
+                                        <span>{completedTopics}/{totalTopics} · {planProgress}%</span>
+                                    </div>
+                                    <div className="h-1 w-full bg-neutral-800 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-violet-600 rounded-full transition-all duration-300"
+                                            style={{ width: `${planProgress}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                {/* Sin plan — placeholder original */}
+                                <div className="flex items-center justify-between mb-4 flex-shrink-0">
+                                    <h2 className="text-[9px] font-mono text-neutral-400 tracking-widest uppercase">Job_Queue</h2>
+                                    <button
+                                        onClick={() => navigate('/study-plan')}
+                                        className="w-5 h-5 rounded border border-neutral-700 flex items-center justify-center text-xs text-neutral-400 hover:bg-neutral-800 transition-colors"
+                                        title="Ir a Plan de Estudio"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <div className="space-y-3 overflow-y-auto pr-1 flex-grow min-h-0">
+                                    <div className="border border-neutral-700 bg-neutral-900/30 p-3 rounded-xl flex gap-3">
+                                        <div className="w-3.5 h-3.5 rounded border border-violet-500 bg-violet-500/20 mt-0.5"></div>
+                                        <h3 className="text-xs font-medium text-neutral-200">Cognitive Psychology Review</h3>
+                                    </div>
+                                </div>
+                                <div className="mt-4 border border-neutral-800 p-3 rounded-xl bg-black/50 flex-shrink-0">
+                                    <p className="text-[10px] font-mono text-neutral-500 italic leading-tight">
+                                        "// Focus is the new IQ."
+                                    </p>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
     );
 }
