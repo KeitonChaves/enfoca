@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MainTimerCard from '../components/timer/MainTimerCard';
+import SessionEndModal from '../components/timer/SessionEndModal';
 import { planService } from '../services/api';
 import { Maximize2 } from 'lucide-react';
 
@@ -10,7 +11,7 @@ const IconChevron = ({ open }) => (
     </svg>
 );
 
-function ModuleItem({ modulo, onToggle }) {
+function ModuleItem({ modulo, temaActivo, onToggle, onSelectTema }) {
     const [expanded, setExpanded] = useState(false);
     const completed = modulo.temas?.filter(t => t.completado).length ?? 0;
     const total     = modulo.temas?.length ?? 0;
@@ -18,22 +19,72 @@ function ModuleItem({ modulo, onToggle }) {
 
     return (
         <div className="border-b border-neutral-800/60 last:border-0">
-            <button onClick={() => setExpanded(v => !v)} className="w-full flex items-center gap-2 py-2 px-1 hover:bg-neutral-800/40 transition-colors text-left group rounded-lg">
+            <button
+                onClick={() => setExpanded(v => !v)}
+                className="w-full flex items-center gap-2 py-2 px-1 hover:bg-neutral-800/40 transition-colors text-left group rounded-lg"
+            >
                 <IconChevron open={expanded} />
                 <div className="flex-1 min-w-0">
-                    <p className={`text-[11px] font-bold tracking-widest uppercase mb-0.5 ${allDone ? 'text-violet-500/50' : 'text-neutral-600'}`}>M{String(modulo.orden).padStart(2, '0')}</p>
-                    <p className={`text-sm truncate leading-tight transition-colors ${allDone ? 'text-neutral-600 line-through' : 'text-neutral-300 group-hover:text-white'}`}>{modulo.titulo}</p>
+                    <p className={`text-[11px] font-bold tracking-widest uppercase mb-0.5 ${allDone ? 'text-violet-500/50' : 'text-neutral-600'}`}>
+                        M{String(modulo.orden).padStart(2, '0')}
+                    </p>
+                    <p className={`text-sm truncate leading-tight transition-colors ${allDone ? 'text-neutral-600 line-through' : 'text-neutral-300 group-hover:text-white'}`}>
+                        {modulo.titulo}
+                    </p>
                 </div>
                 <span className="text-xs text-neutral-600 font-mono flex-shrink-0 ml-1">{completed}/{total}</span>
             </button>
+
             {expanded && (
-                <div className="pl-5 pb-1.5 flex flex-col gap-0.5 border-l border-neutral-800 ml-1.5 mt-0.5">
-                    {modulo.temas?.map(tema => (
-                        <button key={tema.id} onClick={() => onToggle(tema.id)} className="flex items-start gap-1.5 py-1 px-1.5 rounded hover:bg-neutral-800/50 transition-colors text-left w-full group/t">
-                            <span className="mt-1.5 flex-shrink-0 w-1 h-1 rounded-full bg-neutral-800 group-hover/t:bg-neutral-600 transition-colors" />
-                            <span className={`text-xs leading-relaxed select-none transition-all ${tema.completado ? 'text-violet-400/60 underline decoration-violet-500/50 decoration-1 underline-offset-2' : 'text-neutral-500 group-hover/t:text-neutral-300'}`}>{tema.titulo}</span>
-                        </button>
-                    ))}
+                <div className="pl-3 pb-1.5 flex flex-col gap-0.5 border-l border-neutral-800 ml-1.5 mt-0.5">
+                    {modulo.temas?.map(tema => {
+                        const isActive = temaActivo?.id === tema.id;
+                        return (
+                            <div
+                                key={tema.id}
+                                className={`flex items-center gap-2 py-1.5 px-2 rounded-lg transition-colors ${isActive ? 'bg-violet-600/10 border border-violet-500/20' : 'hover:bg-neutral-800/50'}`}
+                            >
+                                {/* Checkbox — togglea completado */}
+                                <button
+                                    onClick={() => onToggle(tema.id)}
+                                    className={`flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                                        tema.completado
+                                            ? 'bg-violet-600 border-violet-600'
+                                            : 'border-neutral-600 hover:border-violet-500'
+                                    }`}
+                                    title={tema.completado ? 'Marcar como pendiente' : 'Marcar como completado'}
+                                >
+                                    {tema.completado && (
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    )}
+                                </button>
+
+                                {/* Texto — selecciona como tema activo */}
+                                <button
+                                    onClick={() => onSelectTema(isActive ? null : tema)}
+                                    className="flex-1 text-left min-w-0"
+                                    title={isActive ? 'Deseleccionar' : 'Trabajar en este tema'}
+                                >
+                                    <span className={`text-xs leading-relaxed select-none transition-all ${
+                                        tema.completado
+                                            ? 'text-neutral-600 line-through'
+                                            : isActive
+                                                ? 'text-violet-300 font-medium'
+                                                : 'text-neutral-400 hover:text-neutral-200'
+                                    }`}>
+                                        {tema.titulo}
+                                    </span>
+                                </button>
+
+                                {/* Indicador de tema activo */}
+                                {isActive && !tema.completado && (
+                                    <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" title="Tema activo" />
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>
@@ -45,35 +96,73 @@ export default function PomodoroPage() {
     const navigate       = useNavigate();
     const autoOpenConfig = location.state?.openConfig ?? false;
 
-    const [plan, setPlan] = useState(location.state?.plan ?? null);
-    const [sesionCompleta, setSesionCompleta] = useState(false);
+    const [plan, setPlan]           = useState(location.state?.plan ?? null);
+    const [temaActivo, setTemaActivo] = useState(null);
+    const [showEndModal, setShowEndModal] = useState(false);
     const [sesionesCompletadas, setSesionesCompletadas] = useState(0);
 
     const [timerConfig, setTimerConfig] = useState({
-        focus: 25,
-        break: 5,
-        longBreakFreq: 4,
-        longBreak: 15,
-        rounds: 4
+        focus: 25, break: 5, longBreakFreq: 4, longBreak: 15, rounds: 4
     });
 
-    // 🔴 useCallback asegura que la función no se re-cree en cada render
     const handleConfigChange = useCallback((config) => {
         setTimerConfig(config);
     }, []);
 
     const toggleTopic = async (temaId) => {
-        // Logica de toggle
-        setPlan(prev => ({ ...prev /*... tu logica ...*/ }));
+        setPlan(prev => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                modulos: prev.modulos.map(m => ({
+                    ...m,
+                    temas: m.temas.map(t =>
+                        t.id === temaId ? { ...t, completado: !t.completado } : t
+                    )
+                }))
+            };
+        });
+        try {
+            await planService.toggleTema(temaId);
+        } catch {
+            // revertir si falla
+            setPlan(prev => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    modulos: prev.modulos.map(m => ({
+                        ...m,
+                        temas: m.temas.map(t =>
+                            t.id === temaId ? { ...t, completado: !t.completado } : t
+                        )
+                    }))
+                };
+            });
+        }
     };
 
     const handleTimerComplete = () => {
-        setSesionCompleta(true);
         setSesionesCompletadas(prev => prev + 1);
+        setShowEndModal(true);
+    };
+
+    const handleTopicComplete = async (temaId) => {
+        const tema = plan?.modulos?.flatMap(m => m.temas).find(t => t.id === temaId);
+        if (tema && !tema.completado) {
+            await toggleTopic(temaId);
+        }
+        setShowEndModal(false);
+        setTemaActivo(null);
+    };
+
+    const handleTopicSchedule = async (fechas) => {
+        if (temaActivo) {
+            await planService.programar(temaActivo.id, fechas).catch(() => {});
+        }
+        setShowEndModal(false);
     };
 
     const isLongBreak = sesionesCompletadas > 0 && sesionesCompletadas % timerConfig.longBreakFreq === 0;
-
     const totalTopics     = plan?.modulos?.reduce((acc, m) => acc + (m.temas?.length ?? 0), 0) ?? 0;
     const completedTopics = plan?.modulos?.reduce((acc, m) => acc + (m.temas?.filter(t => t.completado).length ?? 0), 0) ?? 0;
     const planProgress    = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
@@ -85,15 +174,14 @@ export default function PomodoroPage() {
                 <h1 className="text-[10px] font-mono text-neutral-400 tracking-widest uppercase">Active_Terminal</h1>
                 <div className="hidden md:flex items-center gap-4 text-[10px] font-mono tracking-widest uppercase">
                     <span className="text-violet-400 cursor-pointer">Focus_Session</span>
-
-                    {/* 🔴 EL BOTÓN ENVÍA LA CONFIGURACIÓN ACTIVA */}
                     <button
                         onClick={() => navigate('/focus-mode', {
                             state: {
-                                topic: plan ? { titulo: plan.titulo } : null,
+                                plan,
+                                topic: temaActivo ?? (plan ? { titulo: plan.titulo } : null),
                                 focusDuration: timerConfig.focus * 60,
                                 shortBreakDuration: timerConfig.break * 60,
-                                sesionesCompletadas: sesionesCompletadas,
+                                sesionesCompletadas,
                                 longBreakFreq: timerConfig.longBreakFreq,
                                 longBreakDuration: timerConfig.longBreak * 60,
                                 totalRounds: timerConfig.rounds
@@ -109,29 +197,29 @@ export default function PomodoroPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start flex-grow">
                 <div className="lg:col-span-8 flex flex-col gap-4">
-
-                    {/* 🔴 AQUÍ PASAMOS EL HANDLE AL TIMER */}
                     <MainTimerCard
                         autoOpenConfig={autoOpenConfig}
                         onComplete={handleTimerComplete}
                         onConfigChange={handleConfigChange}
                     />
 
-                    {sesionCompleta && (
+                    {sesionesCompletadas > 0 && !showEndModal && (
                         <div className={`flex items-center gap-4 border rounded-xl px-5 py-4 shadow-lg ${isLongBreak ? 'bg-blue-500/10 border-blue-500/20' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
                             <div>
                                 <p className={`text-sm font-bold ${isLongBreak ? 'text-blue-400' : 'text-emerald-400'}`}>
                                     ¡Sesión completada! ({sesionesCompletadas} ciclos)
                                 </p>
                                 <p className="text-xs text-neutral-400 mt-0.5">
-                                    {isLongBreak ? `Toca un descanso largo (${timerConfig.longBreak} min).` : `Toca un descanso corto (${timerConfig.break} min).`}
+                                    {isLongBreak
+                                        ? `Toca un descanso largo (${timerConfig.longBreak} min).`
+                                        : `Toca un descanso corto (${timerConfig.break} min).`}
                                 </p>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Columna derecha — Plan de estudio */}
+                {/* Panel derecho — Plan de estudio */}
                 <div className="lg:col-span-4 flex flex-col gap-5 self-stretch">
                     <div className="bg-[#0c0c0c] border border-neutral-800 rounded-2xl p-4 flex flex-col flex-grow lg:h-0 lg:min-h-0 overflow-hidden">
                         {plan ? (
@@ -156,15 +244,28 @@ export default function PomodoroPage() {
                                         ←
                                     </button>
                                 </div>
-                                <div className="flex-grow overflow-y-auto pr-0.5 min-h-0 flex flex-col gap-0.5 custom-scrollbar">
+
+                                {temaActivo && (
+                                    <div className="flex-shrink-0 mb-2 px-2 py-1.5 rounded-lg bg-violet-600/10 border border-violet-500/20 flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-violet-500 flex-shrink-0" />
+                                        <p className="text-[10px] text-violet-300 truncate">
+                                            Trabajando en: <span className="font-semibold">{temaActivo.titulo}</span>
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="flex-grow overflow-y-auto pr-0.5 min-h-0 flex flex-col gap-0.5">
                                     {plan.modulos?.map(modulo => (
                                         <ModuleItem
                                             key={modulo.id}
                                             modulo={modulo}
+                                            temaActivo={temaActivo}
                                             onToggle={toggleTopic}
+                                            onSelectTema={setTemaActivo}
                                         />
                                     ))}
                                 </div>
+
                                 <div className="mt-3 flex-shrink-0 border-t border-neutral-800/60 pt-3">
                                     <div className="flex justify-between text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
                                         <span>Avance</span>
@@ -192,7 +293,7 @@ export default function PomodoroPage() {
                                 </div>
                                 <div className="space-y-3 overflow-y-auto pr-1 flex-grow min-h-0">
                                     <div className="border border-neutral-700 bg-neutral-900/30 p-3 rounded-xl flex gap-3">
-                                        <div className="w-3.5 h-3.5 rounded border border-violet-500 bg-violet-500/20 mt-0.5"></div>
+                                        <div className="w-3.5 h-3.5 rounded border border-violet-500 bg-violet-500/20 mt-0.5" />
                                         <h3 className="text-xs font-medium text-neutral-200">Cognitive Psychology Review</h3>
                                     </div>
                                 </div>
@@ -206,6 +307,14 @@ export default function PomodoroPage() {
                     </div>
                 </div>
             </div>
+
+            <SessionEndModal
+                isOpen={showEndModal}
+                onClose={() => setShowEndModal(false)}
+                topic={temaActivo ?? (plan ? { id: null, titulo: plan.titulo } : null)}
+                onComplete={handleTopicComplete}
+                onSchedule={handleTopicSchedule}
+            />
         </div>
     );
 }
