@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -41,6 +43,12 @@ public class Tema {
 
     @Column(name = "completado_en")
     private LocalDateTime completadoEn;
+
+    // --- NUEVO: Relación con las fechas programadas ---
+    @OneToMany(mappedBy = "tema", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OrderBy("fecha ASC")
+    @Builder.Default
+    private List<Programacion> programaciones = new ArrayList<>();
 
     public void incrementarPomodoro() {
         this.pomodorosCompletados++;

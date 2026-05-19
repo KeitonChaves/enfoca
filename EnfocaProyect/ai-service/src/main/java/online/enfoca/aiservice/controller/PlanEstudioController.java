@@ -73,4 +73,13 @@ public class PlanEstudioController {
     public ResponseEntity<String> ping() {
         return ResponseEntity.ok("ai-service OK");
     }
+
+    @PostMapping("/temas/{temaId}/programar")
+    public ResponseEntity<Void> programarTema(
+            @PathVariable UUID temaId,
+            @RequestHeader("X-User-Id") String usuarioId,
+            @Valid @RequestBody ProgramarTemaRequest request) {
+        servicio.programarFechasTema(temaId, usuarioId, request);
+        return ResponseEntity.ok().build();
+    }
 }

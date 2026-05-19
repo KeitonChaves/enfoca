@@ -2,10 +2,7 @@ package online.enfoca.aiservice.servicio;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import online.enfoca.aiservice.dominio.Modulo;
-import online.enfoca.aiservice.dominio.PlanEstudio;
-import online.enfoca.aiservice.dominio.Tema;
-import online.enfoca.aiservice.dominio.Validacion;
+import online.enfoca.aiservice.dominio.*;
 import online.enfoca.aiservice.dto.*;
 import online.enfoca.aiservice.enums.EstadoPlan;
 import online.enfoca.aiservice.ia.ServicioIa;
@@ -16,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -246,4 +244,30 @@ public class ServicioPlanEstudio {
         }
         return modulos;
     }
+
+    @Transactional
+    public void programarFechasTema(UUID temaId, String usuarioId, ProgramarTemaRequest request) {
+        Tema tema = temaRepositorio.findById(temaId)
+                .orElseThrow(() -> new NoSuchElementException("Tema no encontrado: " + temaId));
+
+        if (!usuarioId.equals(tema.getModulo().getPlan().getUsuarioId())) {
+            throw new SecurityException("Acceso no autorizado al tema");
+        }
+
+        // Limpiamos las fechas anteriores que tuviera este tema para sobrescribir con la nueva "alarma"
+        tema.getProgramaciones().clear();
+
+        // Agregamos las nuevas fechas
+        for (LocalDate fecha : request.fechas()) {
+            Programacion prog = Programacion.builder()
+                    .tema(tema)
+                    .fecha(fecha)
+                    .build();
+            tema.getProgramaciones().add(prog);
+        }
+
+        temaRepositorio.save(tema);
+        log.info("Tema {} programado para {} fechas por el usuario {}", temaId, request.fechas().size(), usuarioId);
+    }
+
 }
