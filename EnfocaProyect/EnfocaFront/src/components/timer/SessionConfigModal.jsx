@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
 const INTENSITIES = [
-    { id: 'LIGHT_FLOW',   study: 15, rest: 5,  cycle: 20, desc: '15m estudio · 5m descanso'  },
-    { id: 'STANDARD_POM', study: 25, rest: 5,  cycle: 30, desc: '25m estudio · 5m descanso'  },
-    { id: 'DEEP_WORK',    study: 40, rest: 5,  cycle: 45, desc: '40m estudio · 5m descanso'  },
-    { id: 'EXTENDED_LOG', study: 50, rest: 10, cycle: 60, desc: '50m estudio · 10m descanso' },
+    { id: 'LIGHT_FLOW',   study: 15, rest: 5,  cycle: 20, desc: '15m estudio · 5m descanso',  longBreakFreq: 6, longBreak: 15 },
+    { id: 'STANDARD_POM', study: 25, rest: 5,  cycle: 30, desc: '25m estudio · 5m descanso',  longBreakFreq: 4, longBreak: 15 },
+    { id: 'DEEP_WORK',    study: 40, rest: 5,  cycle: 45, desc: '40m estudio · 5m descanso',  longBreakFreq: 3, longBreak: 20 },
+    { id: 'EXTENDED_LOG', study: 50, rest: 10, cycle: 60, desc: '50m estudio · 10m descanso', longBreakFreq: 2, longBreak: 30 },
 ];
 
 function CardContent({ lvl, state, rounds }) {
@@ -13,8 +13,8 @@ function CardContent({ lvl, state, rounds }) {
             <div className="min-w-0">
                 <p className={`text-sm font-bold tracking-wide uppercase ${
                     state === 'compatible'   ? 'text-violet-400' :
-                    state === 'incompatible' ? 'text-neutral-700 line-through' :
-                                              'text-neutral-600'
+                        state === 'incompatible' ? 'text-neutral-700 line-through' :
+                            'text-neutral-600'
                 }`}>
                     {lvl.id}
                 </p>
@@ -74,7 +74,6 @@ export default function SessionConfigModal({ onConfirm, onClose }) {
         >
             <div className="bg-[#000] border border-[#1a1a1a] rounded-2xl w-full max-w-[520px] mx-4 shadow-[0_0_60px_rgba(139,92,246,0.07)] overflow-hidden">
 
-                {/* Header */}
                 <div className="flex items-start justify-between px-7 py-6 border-b border-[#1a1a1a]">
                     <div>
                         <p className="text-xs text-violet-500/60 tracking-[0.25em] uppercase mb-2">
@@ -87,7 +86,6 @@ export default function SessionConfigModal({ onConfirm, onClose }) {
                     <button
                         onClick={onClose}
                         className="mt-1 text-neutral-600 hover:text-neutral-300 transition-colors p-1"
-                        aria-label="Cerrar"
                     >
                         <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path d="M18 6L6 18M6 6l12 12"/>
@@ -95,7 +93,6 @@ export default function SessionConfigModal({ onConfirm, onClose }) {
                     </button>
                 </div>
 
-                {/* Minutos disponibles */}
                 <div className="px-7 py-7 border-b border-[#1a1a1a]">
                     <label className="text-xs font-semibold text-neutral-500 uppercase tracking-[0.25em] block mb-4">
                         → Minutos disponibles
@@ -127,7 +124,6 @@ export default function SessionConfigModal({ onConfirm, onClose }) {
                     )}
                 </div>
 
-                {/* Selector de intensidad */}
                 <div className="px-7 py-6 flex flex-col gap-3">
                     <p className="text-xs font-semibold text-neutral-500 uppercase tracking-[0.25em] mb-1">
                         → Seleccionar intensidad
@@ -154,6 +150,9 @@ export default function SessionConfigModal({ onConfirm, onClose }) {
                                         breakMinutes: lvl.rest,
                                         rounds,
                                         intensityId:  lvl.id,
+                                        // AQUÍ ENVIAMOS LOS DATOS CLAVE
+                                        longBreakFreq: lvl.longBreakFreq,
+                                        longBreakMinutes: lvl.longBreak
                                     })}
                                     className="border border-violet-500/30 bg-violet-500/5 hover:bg-violet-500/10 hover:border-violet-500/60 rounded-xl px-5 py-4 text-left transition-all active:scale-[0.99]"
                                 >
@@ -170,7 +169,6 @@ export default function SessionConfigModal({ onConfirm, onClose }) {
                     })}
                 </div>
 
-                {/* Demo section */}
                 <div className="px-7 pb-6">
                     <div className="border border-amber-500/20 bg-amber-500/5 rounded-xl p-4">
                         <p className="text-[10px] font-bold tracking-widest uppercase text-amber-500/70 mb-2">
@@ -178,8 +176,7 @@ export default function SessionConfigModal({ onConfirm, onClose }) {
                         </p>
                         <div className="flex items-center justify-between gap-4">
                             <div>
-                                <p className="text-xs text-neutral-400">Sesión de 1 minuto · 0 min descanso · 1 ciclo</p>
-                                <p className="text-[10px] text-neutral-600 mt-0.5">Valida el flujo completo del timer sin comprometer métricas reales.</p>
+                                <p className="text-xs text-neutral-400">Sesión de 1 minuto · 0 min descanso</p>
                             </div>
                             <button
                                 onClick={() => onConfirm({
@@ -187,20 +184,15 @@ export default function SessionConfigModal({ onConfirm, onClose }) {
                                     breakMinutes: 0,
                                     rounds:       1,
                                     intensityId:  'DEMO_MODE',
+                                    longBreakFreq: 2,
+                                    longBreakMinutes: 1
                                 })}
-                                className="flex-shrink-0 px-4 py-2 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-bold transition-all active:scale-95"
+                                className="flex-shrink-0 px-4 py-2 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-bold transition-all"
                             >
                                 Iniciar demo
                             </button>
                         </div>
                     </div>
-                </div>
-
-                {/* Hint footer */}
-                <div className="px-7 py-4 border-t border-[#1a1a1a]">
-                    <p className="text-xs text-neutral-700 tracking-wide">
-                        Seleccionar una opción compatible inicia la sesión automáticamente.
-                    </p>
                 </div>
             </div>
         </div>

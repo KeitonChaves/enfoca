@@ -1,10 +1,10 @@
 // src/contexts/AuthContext.js
-import {createContext, useContext} from 'react';
+import { createContext, useContext } from 'react';
 
-// 1. Exportamos el Contexto (Es una variable normal)
+// 1. Exportamos el Contexto
 export const AuthContext = createContext();
 
-// 2. Exportamos tu Hook (Es una función normal)
+// 2. Exportamos tu Hook unificado
 export const useAuth = () => {
     const context = useContext(AuthContext);
 

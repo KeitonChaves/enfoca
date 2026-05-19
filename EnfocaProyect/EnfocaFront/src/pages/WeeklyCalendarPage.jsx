@@ -7,6 +7,7 @@ import WeeklyGrid from '../components/calendar/WeeklyGrid';
 import WeeklySummarySidebar from '../components/calendar/WeeklySummarySidebar';
 import MonthView from '../components/calendar/MonthView';
 import DetailedDayView from '../components/calendar/DetailedDayView';
+import TopicDetailModal from '../components/calendar/TopicDetailModal'; // <-- Importamos el Modal
 
 export default function WeeklyCalendarPage() {
     const navigate = useNavigate();
@@ -23,6 +24,10 @@ export default function WeeklyCalendarPage() {
     const [currentView, setCurrentView] = useState('month');
     const [selectedDayStr, setSelectedDayStr] = useState(formatearFechaLocal(new Date()));
 
+    // Estados para el Modal de Detalles
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedTopic, setSelectedTopic] = useState(null);
+
     const {
         baseDate,
         setBaseDate,
@@ -34,9 +39,23 @@ export default function WeeklyCalendarPage() {
         goToCurrentWeek
     } = useWeeklyCalendar();
 
-    // Redirige al timer de Pomodoro pasando el tema como estado
-    const handleTopicClick = (topic) => {
+    // 1. Abre el modal al hacer clic en la tarjeta (en cualquier vista)
+    const handleOpenModal = (topic) => {
+        setSelectedTopic(topic);
+        setIsModalOpen(true);
+    };
+
+    // 2. Redirige al timer de Pomodoro (desde el modal o el botón Play rápido)
+    const handleStartFocus = (topic) => {
+        setIsModalOpen(false);
         navigate('/pomodoro', { state: { targetTopic: topic } });
+    };
+
+    // 3. Maneja la reprogramación de la fecha
+    const handleMoveDate = (topic, newDateStr) => {
+        console.log(`[API Mock] Moviendo tema "${topic.titulo}" al día ${newDateStr}`);
+        // TODO: Aquí irá la llamada a tu backend: planService.reprogramar(topic.id, newDateStr)
+        // Y luego puedes recargar los datos: refreshData()
     };
 
     // Al hacer clic en un día (desde el mes o semana), cambiamos a la vista de "Día"
@@ -83,7 +102,7 @@ export default function WeeklyCalendarPage() {
     };
 
     return (
-        <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] text-neutral-900 dark:text-white p-4 md:p-6 lg:p-8">
+        <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] text-neutral-900 dark:text-white p-4 md:p-6 lg:p-8 relative">
 
             {/* Cabecera y Navegación Principal */}
             <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-neutral-200 dark:border-neutral-800 pb-6">
@@ -145,24 +164,44 @@ export default function WeeklyCalendarPage() {
                         // Renderizado condicional basado en el mini-navbar
                         <>
                             {currentView === 'month' && (
-                                <MonthView days={weekData?.mesDias || []} onDayClick={handleDaySelect} onTopicClick={handleTopicClick} />
+                                <MonthView
+                                    days={weekData?.mesDias || []}
+                                    onDayClick={handleDaySelect}
+                                    onTopicClick={handleOpenModal}
+                                />
                             )}
                             {currentView === 'week' && (
-                                <WeeklyGrid days={weekData?.dias || []} onDayClick={handleDaySelect} onTopicClick={handleTopicClick} />
+                                <WeeklyGrid
+                                    days={weekData?.dias || []}
+                                    onDayClick={handleDaySelect}
+                                    onTopicClick={handleOpenModal}
+                                    onStartFocus={handleStartFocus} // <-- Pasamos el botón de Play rápido
+                                />
                             )}
                             {currentView === 'day' && (
-                                <DetailedDayView dayData={activeDayData} onTopicClick={handleTopicClick} />
+                                <DetailedDayView
+                                    dayData={activeDayData}
+                                    onTopicClick={handleOpenModal}
+                                />
                             )}
                         </>
                     )}
                 </div>
-
 
                 <div className="lg:w-80 h-full flex-shrink-0">
                     <WeeklySummarySidebar summary={weekData?.resumen} isLoading={isLoading} />
                 </div>
 
             </div>
+
+            {/* MODAL DE DETALLE Y REPROGRAMACIÓN */}
+            <TopicDetailModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                topic={selectedTopic}
+                onStartFocus={handleStartFocus}
+                onMoveDate={handleMoveDate}
+            />
         </div>
     );
 }
