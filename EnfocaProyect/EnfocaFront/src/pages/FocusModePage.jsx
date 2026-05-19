@@ -23,10 +23,10 @@ export default function FocusModePage() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Validamos datos de entrada
     const state = location.state || {};
-    const topic = state.topic || { id: 1, titulo: "Tema de Ejemplo" };
-    console.log('Valor de topic en FocusModePage:', topic);
+    const topic = state.topic || null;
+    const [plan, setPlan] = useState(state.plan ?? null);
+    const [panelVisible, setPanelVisible] = useState(true);
     const focusDuration      = state.focusDuration || 25 * 60;
     const shortBreakDuration = state.shortBreakDuration || 5 * 60;
     const longBreakFreq      = state.longBreakFreq || 4;
@@ -180,7 +180,63 @@ export default function FocusModePage() {
                 </button>
             </div>
 
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-center min-h-0">
+            <div className="relative z-10 flex-1 flex flex-row min-h-0">
+
+                {/* Panel lateral del plan de estudio */}
+                {plan && (
+                    <div className={`flex-shrink-0 flex flex-col transition-all duration-300 ${panelVisible ? 'w-64' : 'w-10'} bg-black/40 border-r border-white/5 backdrop-blur-sm overflow-hidden`}>
+                        {panelVisible ? (
+                            <div className="flex flex-col h-full">
+                                <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/5">
+                                    <div className="min-w-0">
+                                        <p className="text-[9px] font-mono text-neutral-600 uppercase tracking-widest mb-0.5">Plan activo</p>
+                                        <p className="text-xs font-bold text-white truncate">{plan.titulo}</p>
+                                    </div>
+                                    <button onClick={() => setPanelVisible(false)} className="flex-shrink-0 ml-2 text-neutral-600 hover:text-white transition-colors">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+                                    </button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3">
+                                    {plan.modulos?.map(modulo => {
+                                        const done = modulo.temas?.filter(t => t.completado).length ?? 0;
+                                        const total = modulo.temas?.length ?? 0;
+                                        return (
+                                            <div key={modulo.id}>
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <p className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider truncate">{modulo.nombre}</p>
+                                                    <span className="text-[9px] font-mono text-neutral-700 flex-shrink-0 ml-1">{done}/{total}</span>
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    {modulo.temas?.map(tema => (
+                                                        <div key={tema.id} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors ${tema.completado ? 'bg-violet-600/10' : 'hover:bg-white/5'}`}>
+                                                            <div className={`w-3 h-3 rounded-full flex-shrink-0 border ${tema.completado ? 'bg-violet-500 border-violet-500' : 'border-neutral-700'}`}>
+                                                                {tema.completado && (
+                                                                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3">
+                                                                        <polyline points="20 6 9 17 4 12"/>
+                                                                    </svg>
+                                                                )}
+                                                            </div>
+                                                            <span className={`text-[10px] leading-tight ${tema.completado ? 'text-neutral-500 line-through' : 'text-neutral-300'}`}>
+                                                                {tema.titulo}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ) : (
+                            <button onClick={() => setPanelVisible(true)} className="h-full flex items-center justify-center text-neutral-600 hover:text-white transition-colors">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* Timer centrado */}
+                <div className="flex-1 flex flex-col items-center justify-center min-h-0">
 
                 {/* ── INDICADOR DINÁMICO DE RONDAS TOTALES ── */}
                 <div className="flex gap-3 mb-8">
@@ -230,7 +286,8 @@ export default function FocusModePage() {
                 )}
 
                 {topic && <p className="mt-8 text-xs font-mono text-neutral-500 tracking-widest uppercase">{topic.titulo}</p>}
-            </div>
+                </div>{/* fin timer centrado */}
+            </div>{/* fin flex-row */}
 
             {phase !== 'PREPARING' && (
                 <div className="relative z-10 flex-shrink-0 px-8 pb-6 w-full max-w-lg mx-auto">

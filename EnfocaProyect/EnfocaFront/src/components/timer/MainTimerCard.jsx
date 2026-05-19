@@ -103,6 +103,9 @@ export default function MainTimerCard({ autoOpenConfig = false, onComplete, onCo
     // RUNNING
     useEffect(() => {
         if (phase !== 'RUNNING') return;
+        if (audioRef.current && !audioRef.current.src) {
+            audioRef.current.src = STREAM_URL;
+        }
         audioRef.current?.play().catch(() => {});
 
         const id = setInterval(() => {
@@ -200,15 +203,13 @@ export default function MainTimerCard({ autoOpenConfig = false, onComplete, onCo
         <>
             {showModal && <SessionConfigModal onConfirm={handleConfigConfirm} onClose={() => setShowModal(false)} />}
             <div className="relative bg-[#0c0c0c] border border-neutral-800 rounded-2xl p-4 flex flex-col items-center shadow-2xl w-full overflow-hidden">
-                <audio ref={audioRef} src={STREAM_URL} />
+                <audio ref={audioRef} preload="none" />
 
                 {/* Badge superior */}
                 <div className="flex items-center gap-2 bg-black border border-neutral-800 rounded-full px-3 py-1 mb-4 shadow-sm mt-4">
                     <div className={`w-1.5 h-1.5 rounded-full ${phase === 'PREPARING' ? 'bg-yellow-500 animate-pulse' : isBreakPhase ? 'bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.8)]'}`} />
                     <span className="text-[10px] text-neutral-400 font-mono tracking-widest uppercase">{badgeLabel}</span>
                 </div>
-
-                {/* Volumen oculto por brevedad, se mantiene tu lógica */}
 
                 {/* Reloj central */}
                 <div className="flex items-center justify-center mb-8 select-none h-32 mt-4">
@@ -251,6 +252,43 @@ export default function MainTimerCard({ autoOpenConfig = false, onComplete, onCo
                             )}
                         </button>
                     </div>
+                </div>
+
+                {/* Controles de sonido */}
+                <div className="flex items-center gap-3 mb-6 w-full max-w-[220px]">
+                    <button
+                        onClick={toggleMute}
+                        className="text-neutral-500 hover:text-white transition-colors flex-shrink-0"
+                        title={volume === 0 ? 'Activar sonido' : 'Silenciar'}
+                    >
+                        {volume === 0 ? (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+                            </svg>
+                        ) : volume < 0.5 ? (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                        ) : (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                        )}
+                    </button>
+                    <input
+                        type="range"
+                        min="0" max="1" step="0.05"
+                        value={volume}
+                        onChange={e => handleVolume(parseFloat(e.target.value))}
+                        className="flex-1 h-1 appearance-none rounded-full cursor-pointer accent-violet-500"
+                        style={{ background: `linear-gradient(to right, #8b5cf6 ${volume * 100}%, #262626 ${volume * 100}%)` }}
+                    />
+                    <span className="text-[10px] font-mono text-neutral-600 w-6 text-right tabular-nums">
+                        {Math.round(volume * 100)}
+                    </span>
                 </div>
 
                 {/* Footer de métricas */}

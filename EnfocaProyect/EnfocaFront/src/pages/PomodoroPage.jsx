@@ -74,6 +74,10 @@ export default function PomodoroPage() {
 
     const isLongBreak = sesionesCompletadas > 0 && sesionesCompletadas % timerConfig.longBreakFreq === 0;
 
+    const totalTopics     = plan?.modulos?.reduce((acc, m) => acc + (m.temas?.length ?? 0), 0) ?? 0;
+    const completedTopics = plan?.modulos?.reduce((acc, m) => acc + (m.temas?.filter(t => t.completado).length ?? 0), 0) ?? 0;
+    const planProgress    = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+
     return (
         <div className="h-full flex flex-col p-4 md:p-6 lg:p-8 text-white font-sans selection:bg-violet-500/30">
 

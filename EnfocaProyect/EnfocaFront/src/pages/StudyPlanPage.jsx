@@ -168,6 +168,9 @@ export default function StudyPlanPage() {
 
     const planMostrado = planSeleccionado || planActual;
 
+    const allTopicsCompleted = planMostrado?.modulos?.length > 0 &&
+        planMostrado.modulos.every(m => m.temas?.every(t => t.completado));
+
     return (
         <div className="p-4 md:p-6 flex flex-col gap-8">
 
@@ -280,16 +283,42 @@ export default function StudyPlanPage() {
                             </div>
                         </div>
                         {planMostrado && (
-                            <div className="flex gap-2 items-center">
+                            <div className="flex gap-2 items-center flex-wrap">
                                 <button
                                     onClick={() => navigate('/pomodoro', { state: { plan: planMostrado, openConfig: true } })}
                                     className="flex items-center gap-1.5 px-3 h-8 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all active:scale-95"
-                                    title="Iniciar sesión de enfoque con este plan"
+                                    title="Iniciar sesión Pomodoro con este plan"
                                 >
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M13 2L4.09 12.26a1 1 0 0 0 .91 1.64L11 13l-2 9 8.91-10.26a1 1 0 0 0-.91-1.64L11 11l2-9z"/>
                                     </svg>
                                     Iniciar
+                                </button>
+                                <button
+                                    onClick={() => navigate('/focus-mode', { state: { plan: planMostrado } })}
+                                    className="flex items-center gap-1.5 px-3 h-8 rounded-lg border border-neutral-700 hover:border-violet-500/40 hover:bg-violet-600/10 text-neutral-400 hover:text-violet-300 text-xs font-bold transition-all active:scale-95"
+                                    title="Iniciar sesión Deep Focus con este plan"
+                                >
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                                        <circle cx="12" cy="12" r="3"/><path d="M3 9V5h4M21 9V5h-4M3 15v4h4M21 15v4h-4"/>
+                                    </svg>
+                                    Deep Focus
+                                </button>
+                                <button
+                                    onClick={() => handleEliminar(planMostrado.id)}
+                                    disabled={!allTopicsCompleted}
+                                    title={allTopicsCompleted ? 'Finalizar y archivar plan' : 'Completa todos los temas para finalizar'}
+                                    className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-bold transition-all border ${
+                                        allTopicsCompleted
+                                            ? 'border-emerald-500/40 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 active:scale-95'
+                                            : 'border-neutral-800 text-neutral-700 cursor-not-allowed opacity-50'
+                                    }`}
+                                >
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                        <polyline points="22 4 12 14.01 9 11.01"/>
+                                    </svg>
+                                    Finalizar
                                 </button>
                                 <button onClick={() => handleEliminar(planMostrado.id)}
                                     className="w-8 h-8 rounded-lg border border-neutral-800 hover:bg-red-500/10 hover:border-red-500/20 flex items-center justify-center text-neutral-500 hover:text-red-400 transition-colors"

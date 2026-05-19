@@ -8,12 +8,7 @@ export default function SessionEndModal({ isOpen, onClose, topic, onComplete, on
     const [selectedDays, setSelectedDays] = useState([]);
     const navigate = useNavigate(); // 2. Inicializamos
 
-    console.log('SessionEndModal renderizado:', { isOpen, topic }); // Log para verificar si el componente se monta
-
-    if (!isOpen || !topic) {
-        console.log('Modal no se renderiza: isOpen:', isOpen, 'topic:', topic); // Log para verificar por qué no se renderiza
-        return null;
-    }
+    if (!isOpen || !topic) return null;
 
     const daysOfWeek = [
         { id: '1', label: 'L' }, { id: '2', label: 'M' }, { id: '3', label: 'X' },
