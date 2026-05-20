@@ -37,22 +37,35 @@ function ModuleItem({ modulo, temaActivo, onToggle, onSelectTema }) {
 
             {expanded && (
                 <div className="pl-3 pb-1.5 flex flex-col gap-0.5 border-l border-neutral-800 ml-1.5 mt-0.5">
-                    {modulo.temas?.map(tema => {
+                    {modulo.temas?.map((tema, index) => {
                         const isActive = temaActivo?.id === tema.id;
+                        const prevAllDone = modulo.temas.slice(0, index).every(t => t.completado);
+                        const nextAnyDone = modulo.temas.slice(index + 1).some(t => t.completado);
+                        // Para marcar: todos los anteriores deben estar completos
+                        // Para desmarcar: ninguno de los siguientes puede estar completo
+                        const canToggle = tema.completado ? !nextAnyDone : prevAllDone;
+
                         return (
                             <div
                                 key={tema.id}
                                 className={`flex items-center gap-2 py-1.5 px-2 rounded-lg transition-colors ${isActive ? 'bg-violet-600/10 border border-violet-500/20' : 'hover:bg-neutral-800/50'}`}
                             >
-                                {/* Checkbox — togglea completado */}
+                                {/* Checkbox con validación secuencial */}
                                 <button
-                                    onClick={() => onToggle(tema.id)}
+                                    onClick={() => canToggle && onToggle(tema.id)}
+                                    disabled={!canToggle}
+                                    title={
+                                        tema.completado
+                                            ? (!canToggle ? 'Desmarca los temas siguientes primero' : 'Marcar como pendiente')
+                                            : (!canToggle ? 'Completa los temas anteriores primero' : 'Marcar como completado')
+                                    }
                                     className={`flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-all ${
                                         tema.completado
                                             ? 'bg-violet-600 border-violet-600'
-                                            : 'border-neutral-600 hover:border-violet-500'
+                                            : canToggle
+                                                ? 'border-neutral-600 hover:border-violet-500 cursor-pointer'
+                                                : 'border-neutral-800 bg-neutral-900/50 cursor-not-allowed opacity-40'
                                     }`}
-                                    title={tema.completado ? 'Marcar como pendiente' : 'Marcar como completado'}
                                 >
                                     {tema.completado && (
                                         <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3">
@@ -78,7 +91,6 @@ function ModuleItem({ modulo, temaActivo, onToggle, onSelectTema }) {
                                     </span>
                                 </button>
 
-                                {/* Indicador de tema activo */}
                                 {isActive && !tema.completado && (
                                     <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" title="Tema activo" />
                                 )}
