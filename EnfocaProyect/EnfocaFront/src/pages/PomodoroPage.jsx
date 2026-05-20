@@ -74,18 +74,29 @@ function ModuleItem({ modulo, temaActivo, onToggle, onSelectTema }) {
                                     )}
                                 </button>
 
-                                {/* Texto — selecciona como tema activo */}
+                                {/* Texto — selecciona como tema activo (requiere anteriores completos) */}
                                 <button
-                                    onClick={() => onSelectTema(isActive ? null : tema)}
-                                    className="flex-1 text-left min-w-0"
-                                    title={isActive ? 'Deseleccionar' : 'Trabajar en este tema'}
+                                    onClick={() => (isActive || prevAllDone) && !tema.completado && onSelectTema(isActive ? null : tema)}
+                                    disabled={!isActive && (!prevAllDone || tema.completado)}
+                                    title={
+                                        tema.completado
+                                            ? 'Tema ya completado'
+                                            : isActive
+                                                ? 'Deseleccionar'
+                                                : !prevAllDone
+                                                    ? 'Completa los temas anteriores primero'
+                                                    : 'Trabajar en este tema'
+                                    }
+                                    className={`flex-1 text-left min-w-0 ${!isActive && (!prevAllDone || tema.completado) ? 'cursor-not-allowed' : ''}`}
                                 >
                                     <span className={`text-xs leading-relaxed select-none transition-all ${
                                         tema.completado
                                             ? 'text-neutral-600 line-through'
                                             : isActive
                                                 ? 'text-violet-300 font-medium'
-                                                : 'text-neutral-400 hover:text-neutral-200'
+                                                : !prevAllDone
+                                                    ? 'text-neutral-700'
+                                                    : 'text-neutral-400 hover:text-neutral-200'
                                     }`}>
                                         {tema.titulo}
                                     </span>
