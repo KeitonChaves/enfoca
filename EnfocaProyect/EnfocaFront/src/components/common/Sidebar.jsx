@@ -62,7 +62,6 @@ const menuItems = [
     { name: 'Plan de Estudio', path: '/study-plan', icon: <IconBook /> },
     { name: 'Biblioteca',      path: '/library',    icon: <IconLibrary /> },
     { name: 'Análisis',        path: '/analytics',  icon: <IconChart /> },
-    { name: 'Deep Focus',      path: '/focus-mode', icon: <IconFocus /> },
     { name: 'Calendario',      path: '/calendar',   icon: <IconCalendar/>}
 ];
 

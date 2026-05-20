@@ -18,7 +18,7 @@ const STREAM_URL      = 'https://stream.zeno.fm/f3wvbbqmdg8uv';
 const PREP_TIME       = 10;
 
 // 🔴 IMPORTANTE: Asegúrate de que onConfigChange esté escrito aquí
-export default function MainTimerCard({ autoOpenConfig = false, onComplete, onConfigChange }) {
+export default function MainTimerCard({ autoOpenConfig = false, onComplete, onConfigChange, onPhaseChange, stopRequested = false }) {
 
     const [phase, setPhase]       = useState('IDLE');
     const [sessionId, setSessionId] = useState(null);
@@ -41,6 +41,19 @@ export default function MainTimerCard({ autoOpenConfig = false, onComplete, onCo
     useEffect(() => {
         if (audioRef.current) audioRef.current.volume = volume;
     }, [volume]);
+
+    useEffect(() => { onPhaseChange?.(phase); }, [phase]);
+
+    useEffect(() => {
+        if (!stopRequested || phase === 'IDLE') return;
+        audioRef.current?.pause();
+        if (sessionId) pomodoroService.completar(sessionId, 'ABANDONED').catch(() => {});
+        setSessionId(null);
+        setSessionConfig(null);
+        setRoundsLeft(0);
+        setPhase('IDLE');
+        onComplete?.();
+    }, [stopRequested]);
 
     useEffect(() => {
         if (autoOpenConfig) setShowModal(true);

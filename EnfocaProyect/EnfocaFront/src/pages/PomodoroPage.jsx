@@ -118,10 +118,12 @@ export default function PomodoroPage() {
     const navigate       = useNavigate();
     const autoOpenConfig = location.state?.openConfig ?? false;
 
-    const [plan, setPlan]           = useState(location.state?.plan ?? null);
-    const [temaActivo, setTemaActivo] = useState(null);
+    const [plan, setPlan]                 = useState(location.state?.plan ?? null);
+    const [temaActivo, setTemaActivo]     = useState(null);
     const [showEndModal, setShowEndModal] = useState(false);
     const [sesionesCompletadas, setSesionesCompletadas] = useState(0);
+    const [timerPhase, setTimerPhase]     = useState('IDLE');
+    const [stopRequested, setStopRequested] = useState(false);
 
     const [timerConfig, setTimerConfig] = useState({
         focus: 25, break: 5, longBreakFreq: 4, longBreak: 15, rounds: 4
@@ -197,6 +199,7 @@ export default function PomodoroPage() {
     };
 
     const handleTimerComplete = () => {
+        setStopRequested(false);
         setSesionesCompletadas(prev => prev + 1);
 
         // Si no hay tema activo, usar el primer tema incompleto del plan
@@ -266,7 +269,21 @@ export default function PomodoroPage() {
                         autoOpenConfig={autoOpenConfig}
                         onComplete={handleTimerComplete}
                         onConfigChange={handleConfigChange}
+                        onPhaseChange={setTimerPhase}
+                        stopRequested={stopRequested}
                     />
+
+                    {(timerPhase === 'RUNNING' || timerPhase === 'PAUSED' || timerPhase === 'BREAK') && (
+                        <button
+                            onClick={() => setStopRequested(true)}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 hover:border-red-500/30 text-xs font-semibold tracking-wider uppercase transition-all"
+                        >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="4" y="4" width="16" height="16" rx="2"/>
+                            </svg>
+                            Finalizar sesión
+                        </button>
+                    )}
 
                     {sesionesCompletadas > 0 && !showEndModal && (
                         <div className={`flex items-center gap-4 border rounded-xl px-5 py-4 shadow-lg ${isLongBreak ? 'bg-blue-500/10 border-blue-500/20' : 'bg-emerald-500/10 border-emerald-500/20'}`}>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SessionEndModal from '../components/timer/SessionEndModal';
+import { planService } from '../services/api';
 
 const STREAM_URL  = 'https://stream.zeno.fm/f3wvbbqmdg8uv';
 
@@ -42,6 +43,48 @@ export default function FocusModePage() {
     const [volume, setVolume] = useState(0.7);
     const audioRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const toggleTopic = async (temaId) => {
+        if (!plan) return;
+        let modIdx = -1, temaIdx = -1;
+        plan.modulos.forEach((m, mi) => m.temas.forEach((t, ti) => {
+            if (t.id === temaId) { modIdx = mi; temaIdx = ti; }
+        }));
+        if (modIdx === -1) return;
+
+        const estaCompletado = plan.modulos[modIdx].temas[temaIdx].completado;
+
+        if (estaCompletado) {
+            const idsADesmarcar = [];
+            plan.modulos.forEach((m, mi) => m.temas.forEach((t, ti) => {
+                if (t.completado && ((mi === modIdx && ti >= temaIdx) || mi > modIdx))
+                    idsADesmarcar.push(t.id);
+            }));
+            setPlan(prev => ({
+                ...prev,
+                modulos: prev.modulos.map((m, mi) => ({
+                    ...m,
+                    temas: m.temas.map((t, ti) => {
+                        const esDespues = (mi === modIdx && ti >= temaIdx) || mi > modIdx;
+                        return esDespues ? { ...t, completado: false } : t;
+                    })
+                }))
+            }));
+            idsADesmarcar.forEach(id => planService.toggleTema(id).catch(() => {}));
+        } else {
+            setPlan(prev => ({
+                ...prev,
+                modulos: prev.modulos.map((m, mi) => ({
+                    ...m,
+                    temas: m.temas.map((t, ti) =>
+                        mi === modIdx && ti === temaIdx ? { ...t, completado: true } : t
+                    )
+                }))
+            }));
+            planService.toggleTema(temaId).catch(() => {});
+            planService.registrarSesion(temaId).catch(() => {});
+        }
+    };
 
     useEffect(() => {
         if (audioRef.current) audioRef.current.volume = volume;
@@ -197,30 +240,50 @@ export default function FocusModePage() {
                                     </button>
                                 </div>
                                 <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3">
-                                    {plan.modulos?.map(modulo => {
-                                        const done = modulo.temas?.filter(t => t.completado).length ?? 0;
+                                    {plan.modulos?.map((modulo, modIndex) => {
+                                        const done  = modulo.temas?.filter(t => t.completado).length ?? 0;
                                         const total = modulo.temas?.length ?? 0;
+                                        const moduleUnlocked = plan.modulos
+                                            .slice(0, modIndex)
+                                            .every(m => m.temas?.every(t => t.completado));
                                         return (
                                             <div key={modulo.id}>
                                                 <div className="flex items-center justify-between mb-1.5">
-                                                    <p className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider truncate">{modulo.nombre}</p>
+                                                    <p className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider truncate">{modulo.titulo}</p>
                                                     <span className="text-[9px] font-mono text-neutral-700 flex-shrink-0 ml-1">{done}/{total}</span>
                                                 </div>
                                                 <div className="flex flex-col gap-1">
-                                                    {modulo.temas?.map(tema => (
-                                                        <div key={tema.id} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors ${tema.completado ? 'bg-violet-600/10' : 'hover:bg-white/5'}`}>
-                                                            <div className={`w-3 h-3 rounded-full flex-shrink-0 border ${tema.completado ? 'bg-violet-500 border-violet-500' : 'border-neutral-700'}`}>
-                                                                {tema.completado && (
-                                                                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3">
-                                                                        <polyline points="20 6 9 17 4 12"/>
-                                                                    </svg>
-                                                                )}
-                                                            </div>
-                                                            <span className={`text-[10px] leading-tight ${tema.completado ? 'text-neutral-500 line-through' : 'text-neutral-300'}`}>
-                                                                {tema.titulo}
-                                                            </span>
-                                                        </div>
-                                                    ))}
+                                                    {modulo.temas?.map((tema, temaIndex) => {
+                                                        const prevAllDone = moduleUnlocked && modulo.temas.slice(0, temaIndex).every(t => t.completado);
+                                                        const nextAnyDone = modulo.temas.slice(temaIndex + 1).some(t => t.completado);
+                                                        const canToggle = moduleUnlocked && (tema.completado ? !nextAnyDone : prevAllDone);
+                                                        return (
+                                                            <button
+                                                                key={tema.id}
+                                                                onClick={() => canToggle && toggleTopic(tema.id)}
+                                                                disabled={!canToggle}
+                                                                title={tema.completado
+                                                                    ? (!canToggle ? 'Desmarca los temas siguientes primero' : 'Desmarcar')
+                                                                    : (!canToggle ? 'Completa los anteriores primero' : 'Marcar como completado')}
+                                                                className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left w-full ${
+                                                                    tema.completado ? 'bg-violet-600/10' : canToggle ? 'hover:bg-white/5 cursor-pointer' : 'cursor-not-allowed opacity-40'
+                                                                }`}
+                                                            >
+                                                                <div className={`w-3 h-3 rounded flex-shrink-0 border flex items-center justify-center transition-all ${
+                                                                    tema.completado ? 'bg-violet-500 border-violet-500' : canToggle ? 'border-neutral-500' : 'border-neutral-700'
+                                                                }`}>
+                                                                    {tema.completado && (
+                                                                        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3">
+                                                                            <polyline points="20 6 9 17 4 12"/>
+                                                                        </svg>
+                                                                    )}
+                                                                </div>
+                                                                <span className={`text-[10px] leading-tight ${tema.completado ? 'text-neutral-500 line-through' : 'text-neutral-300'}`}>
+                                                                    {tema.titulo}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         );
