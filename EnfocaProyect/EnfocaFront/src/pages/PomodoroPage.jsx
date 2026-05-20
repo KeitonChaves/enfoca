@@ -132,34 +132,66 @@ export default function PomodoroPage() {
     }, []);
 
     const toggleTopic = async (temaId) => {
-        setPlan(prev => {
-            if (!prev) return prev;
-            return {
+        if (!plan) return;
+
+        // Localizar el tema y su posición
+        let modIdx = -1, temaIdx = -1;
+        plan.modulos.forEach((m, mi) => {
+            m.temas.forEach((t, ti) => {
+                if (t.id === temaId) { modIdx = mi; temaIdx = ti; }
+            });
+        });
+        if (modIdx === -1) return;
+
+        const estaCompletado = plan.modulos[modIdx].temas[temaIdx].completado;
+
+        if (estaCompletado) {
+            // DESMARCAR — cascada: desmarcar el tema y todos los posteriores
+            // (siguientes del mismo módulo + todos los de módulos siguientes)
+            const idsADesmarcar = [];
+            plan.modulos.forEach((m, mi) => {
+                m.temas.forEach((t, ti) => {
+                    if (!t.completado) return;
+                    const esDespues =
+                        (mi === modIdx && ti >= temaIdx) || mi > modIdx;
+                    if (esDespues) idsADesmarcar.push(t.id);
+                });
+            });
+
+            // Actualizar estado local de una vez
+            setPlan(prev => ({
                 ...prev,
-                modulos: prev.modulos.map(m => ({
+                modulos: prev.modulos.map((m, mi) => ({
                     ...m,
-                    temas: m.temas.map(t =>
-                        t.id === temaId ? { ...t, completado: !t.completado } : t
+                    temas: m.temas.map((t, ti) => {
+                        const esDespues =
+                            (mi === modIdx && ti >= temaIdx) || mi > modIdx;
+                        return esDespues ? { ...t, completado: false } : t;
+                    })
+                }))
+            }));
+
+            // Limpiar tema activo si estaba en alguno de los desmarcados
+            setTemaActivo(prev =>
+                prev && idsADesmarcar.includes(prev.id) ? null : prev
+            );
+
+            // Llamar API por cada uno
+            idsADesmarcar.forEach(id => planService.toggleTema(id).catch(() => {}));
+        } else {
+            // MARCAR — solo este tema
+            setPlan(prev => ({
+                ...prev,
+                modulos: prev.modulos.map((m, mi) => ({
+                    ...m,
+                    temas: m.temas.map((t, ti) =>
+                        mi === modIdx && ti === temaIdx
+                            ? { ...t, completado: true }
+                            : t
                     )
                 }))
-            };
-        });
-        try {
-            await planService.toggleTema(temaId);
-        } catch {
-            // revertir si falla
-            setPlan(prev => {
-                if (!prev) return prev;
-                return {
-                    ...prev,
-                    modulos: prev.modulos.map(m => ({
-                        ...m,
-                        temas: m.temas.map(t =>
-                            t.id === temaId ? { ...t, completado: !t.completado } : t
-                        )
-                    }))
-                };
-            });
+            }));
+            planService.toggleTema(temaId).catch(() => {});
         }
     };
 
