@@ -13,6 +13,8 @@ public interface PlanEstudioRepositorio extends JpaRepository<PlanEstudio, UUID>
 
     List<PlanEstudio> findByUsuarioIdOrderByCreadoEnDesc(String usuarioId);
 
+    long countByUsuarioId(String usuarioId);
+
     List<PlanEstudio> findByEstadoOrderByCreadoEnDesc(EstadoPlan estado);
 
     @Query("""

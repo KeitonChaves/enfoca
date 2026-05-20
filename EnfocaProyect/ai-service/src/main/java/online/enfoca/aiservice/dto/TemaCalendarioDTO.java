@@ -7,6 +7,7 @@ public record TemaCalendarioDTO(
         String titulo,
         String moduloTitulo,
         String planTitulo,
+        String planColor,
         boolean completado,
         int pomodorosCompletados,
         int pomodorosEstimados

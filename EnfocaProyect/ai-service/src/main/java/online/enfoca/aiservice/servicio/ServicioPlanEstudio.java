@@ -56,16 +56,26 @@ public class ServicioPlanEstudio {
         this.objectMapper = objectMapper;
     }
 
+    private static final String[] PALETA_COLORES = {
+        "#8b5cf6", "#06b6d4", "#10b981", "#f59e0b",
+        "#ef4444", "#ec4899", "#3b82f6", "#f97316"
+    };
+
     @Transactional
     public PlanEstudioResponse crear(String usuarioId, CrearPlanRequest request) {
         String[] prompts = constructorPrompt.promptGeneracion(request);
         String respuestaIa = servicioIa.generar(usuarioId, prompts[0], prompts[1]);
+
+        // Asignar color rotativo basado en cantidad de planes existentes
+        long totalPlanes = planRepositorio.countByUsuarioId(usuarioId);
+        String color = PALETA_COLORES[(int)(totalPlanes % PALETA_COLORES.length)];
 
         PlanEstudio plan = PlanEstudio.builder()
                 .usuarioId(usuarioId)
                 .titulo(request.materia())
                 .objetivo(request.objetivo())
                 .nivel(request.nivelEfectivo())
+                .color(color)
                 .build();
 
         plan = planRepositorio.save(plan);
@@ -145,11 +155,12 @@ public class ServicioPlanEstudio {
     }
 
     @Transactional
-    public TemaResponse toggleTema(UUID temaId, String usuarioId) {
+    public ToggleTemaResponse toggleTema(UUID temaId, String usuarioId) {
         Tema tema = temaRepositorio.findById(temaId)
                 .orElseThrow(() -> new NoSuchElementException("Tema no encontrado: " + temaId));
 
-        PlanEstudio plan = tema.getModulo().getPlan();
+        Modulo modulo = tema.getModulo();
+        PlanEstudio plan = modulo.getPlan();
         if (!usuarioId.equals(plan.getUsuarioId())) {
             throw new SecurityException("Acceso no autorizado al tema");
         }
@@ -159,8 +170,49 @@ public class ServicioPlanEstudio {
         tema.setCompletadoEn(nuevoEstado ? LocalDateTime.now() : null);
         temaRepositorio.save(tema);
 
-        log.info("Tema {} marcado completado={} por usuario {}", temaId, nuevoEstado, usuarioId);
-        return TemaResponse.desde(tema);
+        // Verificar si el módulo quedó completamente terminado
+        boolean moduloCompletado = modulo.getTemas().stream().allMatch(Tema::isCompletado);
+
+        log.info("Tema {} marcado completado={} por usuario {} — módulo completado: {}", temaId, nuevoEstado, usuarioId, moduloCompletado);
+        return new ToggleTemaResponse(TemaResponse.desde(tema), moduloCompletado, modulo.getId(), modulo.getTitulo());
+    }
+
+    @Transactional(readOnly = true)
+    public CuestionarioResponse generarCuestionario(UUID moduloId, String usuarioId) {
+        Modulo modulo = moduloRepositorio.findById(moduloId)
+                .orElseThrow(() -> new NoSuchElementException("Módulo no encontrado: " + moduloId));
+
+        if (!usuarioId.equals(modulo.getPlan().getUsuarioId())) {
+            throw new SecurityException("Acceso no autorizado al módulo");
+        }
+
+        String temasLista = modulo.getTemas().stream()
+                .map(t -> "- " + t.getTitulo())
+                .collect(Collectors.joining("\n"));
+
+        String[] prompts = constructorPrompt.promptCuestionario(modulo.getTitulo(), temasLista);
+        String respuestaIa = servicioIa.generar(usuarioId, prompts[0], prompts[1]);
+
+        try {
+            JsonNode raiz = objectMapper.readTree(respuestaIa);
+            JsonNode nodoPreguntas = raiz.path("preguntas");
+            List<CuestionarioResponse.PreguntaDTO> preguntas = new ArrayList<>();
+
+            for (JsonNode nodo : nodoPreguntas) {
+                List<String> opciones = new ArrayList<>();
+                nodo.path("opciones").forEach(o -> opciones.add(o.asText()));
+                preguntas.add(new CuestionarioResponse.PreguntaDTO(
+                        nodo.path("texto").asText(),
+                        opciones,
+                        nodo.path("respuesta_correcta").asInt(0),
+                        nodo.path("explicacion").asText("")
+                ));
+            }
+            return new CuestionarioResponse(moduloId, modulo.getTitulo(), preguntas);
+        } catch (Exception e) {
+            log.error("Error al parsear cuestionario para módulo {}: {}", moduloId, e.getMessage());
+            throw new RuntimeException("Error al generar el cuestionario");
+        }
     }
 
     @Transactional(readOnly = true)
@@ -232,11 +284,17 @@ public class ServicioPlanEstudio {
                 JsonNode nodoTemas = nodoModulo.path("temas");
                 List<Tema> temas = new ArrayList<>();
                 for (JsonNode nodoTema : nodoTemas) {
+                    String guiaSocratica = null;
+                    JsonNode nodoGuia = nodoTema.path("guia_socratica");
+                    if (!nodoGuia.isMissingNode() && !nodoGuia.isNull()) {
+                        try { guiaSocratica = objectMapper.writeValueAsString(nodoGuia); } catch (Exception ignored) {}
+                    }
                     Tema tema = Tema.builder()
                             .modulo(modulo)
                             .orden(nodoTema.path("orden").asInt(temas.size() + 1))
                             .titulo(nodoTema.path("titulo").asText("Tema sin título"))
                             .pomodorosEstimados(Math.max(1, nodoTema.path("pomodoros_estimados").asInt(3)))
+                            .guiaSocratica(guiaSocratica)
                             .build();
                     temas.add(temaRepositorio.save(tema));
                 }
@@ -290,6 +348,7 @@ public class ServicioPlanEstudio {
                                     p.getTema().getTitulo(),
                                     p.getTema().getModulo().getTitulo(),
                                     p.getTema().getModulo().getPlan().getTitulo(),
+                                    p.getTema().getModulo().getPlan().getColor(),
                                     p.getTema().isCompletado(),
                                     p.getTema().getPomodorosCompletados(),
                                     p.getTema().getPomodorosEstimados()))

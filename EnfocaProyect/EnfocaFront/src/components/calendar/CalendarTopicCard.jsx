@@ -25,10 +25,13 @@ export default function CalendarTopicCard({ topic, onClick, onStartFocus }) {
         iconColor = "text-violet-500";
     }
 
+    const planColor = topic.planColor ?? '#8b5cf6';
+
     return (
         <div
             onClick={() => onClick(topic)}
             className={`w-full text-left p-2.5 rounded-lg border transition-all hover:shadow-md cursor-pointer group flex flex-col gap-1.5 relative ${stateClasses}`}
+            style={!isCompleted ? { borderLeftColor: planColor, borderLeftWidth: '3px' } : {}}
         >
             <div className="flex items-start justify-between gap-2">
                 <h4 className={`text-xs font-medium leading-tight line-clamp-2 pr-4 ${isCompleted ? 'text-green-800 dark:text-green-300' : 'text-neutral-800 dark:text-neutral-200'}`}>
@@ -38,7 +41,7 @@ export default function CalendarTopicCard({ topic, onClick, onStartFocus }) {
             </div>
 
             <div className="flex items-center justify-between mt-1">
-                <span className="text-[9px] font-mono uppercase tracking-wider text-neutral-500 truncate max-w-[70%]">
+                <span className="text-[9px] font-mono uppercase tracking-wider truncate max-w-[70%]" style={{ color: planColor + 'cc' }}>
                     {topic.moduloTitulo}
                 </span>
 
@@ -54,9 +57,12 @@ export default function CalendarTopicCard({ topic, onClick, onStartFocus }) {
             {isInProgress && (
                 <div className="w-full h-1 bg-neutral-100 dark:bg-neutral-800 rounded-full mt-1 overflow-hidden">
                     <div
-                        className="h-full bg-violet-500 rounded-full"
-                        style={{ width: `${(topic.pomodorosCompletados / topic.pomodorosEstimados) * 100}%` }}
-                    ></div>
+                        className="h-full rounded-full"
+                        style={{
+                            width: `${(topic.pomodorosCompletados / topic.pomodorosEstimados) * 100}%`,
+                            backgroundColor: planColor
+                        }}
+                    />
                 </div>
             )}
 

@@ -12,7 +12,8 @@ public record TemaResponse(
         int pomodorosEstimados,
         int pomodorosCompletados,
         boolean completado,
-        LocalDateTime completadoEn
+        LocalDateTime completadoEn,
+        String guiaSocratica
 ) {
     public static TemaResponse desde(Tema tema) {
         return new TemaResponse(
@@ -22,7 +23,8 @@ public record TemaResponse(
                 tema.getPomodorosEstimados(),
                 tema.getPomodorosCompletados(),
                 tema.isCompletado(),
-                tema.getCompletadoEn()
+                tema.getCompletadoEn(),
+                tema.getGuiaSocratica()
         );
     }
 }

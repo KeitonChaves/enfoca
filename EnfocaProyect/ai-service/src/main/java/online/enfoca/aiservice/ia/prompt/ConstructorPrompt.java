@@ -24,6 +24,8 @@ public class ConstructorPrompt {
     private String plantillaPlan;
     private String sistemaMejora;
     private String plantillaMejora;
+    private String sistemaCuestionario;
+    private String plantillaCuestionario;
 
     public ConstructorPrompt(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
@@ -31,10 +33,12 @@ public class ConstructorPrompt {
 
     @PostConstruct
     public void cargarPrompts() throws IOException {
-        this.sistemaPlan    = leer("classpath:prompts/sistema-generacion.txt");
-        this.plantillaPlan  = leer("classpath:prompts/usuario-generacion.txt");
-        this.sistemaMejora  = leer("classpath:prompts/sistema-mejora.txt");
-        this.plantillaMejora = leer("classpath:prompts/usuario-mejora.txt");
+        this.sistemaPlan         = leer("classpath:prompts/sistema-generacion.txt");
+        this.plantillaPlan       = leer("classpath:prompts/usuario-generacion.txt");
+        this.sistemaMejora       = leer("classpath:prompts/sistema-mejora.txt");
+        this.plantillaMejora     = leer("classpath:prompts/usuario-mejora.txt");
+        this.sistemaCuestionario = leer("classpath:prompts/sistema-cuestionario.txt");
+        this.plantillaCuestionario = leer("classpath:prompts/usuario-cuestionario.txt");
         log.info("Prompts de IA cargados desde resources/prompts/");
     }
 
@@ -51,6 +55,13 @@ public class ConstructorPrompt {
         String usuario = plantillaMejora
                 .replace("{plan_json}", planJson);
         return new String[]{ sistemaMejora, usuario };
+    }
+
+    public String[] promptCuestionario(String moduloTitulo, String temasLista) {
+        String usuario = plantillaCuestionario
+                .replace("{modulo_titulo}", moduloTitulo)
+                .replace("{temas_lista}", temasLista);
+        return new String[]{ sistemaCuestionario, usuario };
     }
 
     private String leer(String ubicacion) throws IOException {

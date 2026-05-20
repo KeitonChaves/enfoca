@@ -10,8 +10,13 @@ REGLAS:
 2. Cada módulo debe tener entre 2 y 5 temas específicos y accionables.
 3. Estima los pomodoros (25 min c/u) necesarios por tema según su complejidad.
 4. Los títulos deben ser concretos, no genéricos.
+5. Por cada tema genera una guía socrática que NUNCA explique el contenido directamente.
+   La guía debe obligar al estudiante a investigar y recordar por sí mismo (Active Recall).
+   - "que_investigar": 2-3 conceptos clave que el estudiante debe buscar por su cuenta.
+   - "diferencias_clave": 1-2 comparaciones que suelen confundir (ej. "X vs Y").
+   - "preguntas_guia": 2-3 preguntas abiertas para evaluar si realmente entendió.
 
-Devuelve SOLO este JSON:
+Devuelve SOLO este JSON (sin texto adicional, sin bloques ```):
 {
   "titulo": "string",
   "modulos": [
@@ -22,7 +27,12 @@ Devuelve SOLO este JSON:
         {
           "titulo": "string",
           "orden": 1,
-          "pomodoros_estimados": 3
+          "pomodoros_estimados": 3,
+          "guia_socratica": {
+            "que_investigar": ["concepto A", "concepto B"],
+            "diferencias_clave": ["X vs Y"],
+            "preguntas_guia": ["¿Qué sucede cuando...?", "¿Por qué...?"]
+          }
         }
       ]
     }

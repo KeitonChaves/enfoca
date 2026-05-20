@@ -61,9 +61,10 @@ export const planService = {
     eliminar:   (id)      => api.delete(`/planes-estudio/${id}`),
     validar:    (id,data) => api.post(`/planes-estudio/${id}/validaciones`, data),
     catalogo:   ()        => api.get('/planes-estudio/catalogo'),
-    toggleTema:      (temaId)        => api.patch(`/planes-estudio/temas/${temaId}/completado`),
-    programar:       (temaId, fechas) => api.post(`/planes-estudio/temas/${temaId}/programar`, { fechas }),
-    registrarSesion: (temaId)        => api.post(`/planes-estudio/temas/${temaId}/sesion-hoy`),
+    toggleTema:          (temaId)        => api.patch(`/planes-estudio/temas/${temaId}/completado`),
+    programar:           (temaId, fechas) => api.post(`/planes-estudio/temas/${temaId}/programar`, { fechas }),
+    registrarSesion:     (temaId)        => api.post(`/planes-estudio/temas/${temaId}/sesion-hoy`),
+    generarCuestionario: (moduloId)      => api.post(`/planes-estudio/modulos/${moduloId}/cuestionario`),
 };
 
 export const metricsService = {

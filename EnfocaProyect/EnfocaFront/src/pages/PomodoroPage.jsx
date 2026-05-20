@@ -2,6 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MainTimerCard from '../components/timer/MainTimerCard';
 import SessionEndModal from '../components/timer/SessionEndModal';
+import SocraticGuidePanel from '../components/study/SocraticGuidePanel';
+import QuizModal from '../components/study/QuizModal';
 import { planService } from '../services/api';
 import { Maximize2 } from 'lucide-react';
 
@@ -124,6 +126,9 @@ export default function PomodoroPage() {
     const [sesionesCompletadas, setSesionesCompletadas] = useState(0);
     const [timerPhase, setTimerPhase]     = useState('IDLE');
     const [stopRequested, setStopRequested] = useState(false);
+    const [quiz, setQuiz]                 = useState(null);
+    const [quizLoading, setQuizLoading]   = useState(false);
+    const [showQuiz, setShowQuiz]         = useState(false);
 
     const [timerConfig, setTimerConfig] = useState({
         focus: 25, break: 5, longBreakFreq: 4, longBreak: 15, rounds: 4
@@ -182,9 +187,9 @@ export default function PomodoroPage() {
             idsADesmarcar.forEach(id => planService.toggleTema(id).catch(() => {}));
         } else {
             // MARCAR — solo este tema + registrar hoy en calendario
-            setPlan(prev => ({
-                ...prev,
-                modulos: prev.modulos.map((m, mi) => ({
+            const nuevoEstadoPlan = {
+                ...plan,
+                modulos: plan.modulos.map((m, mi) => ({
                     ...m,
                     temas: m.temas.map((t, ti) =>
                         mi === modIdx && ti === temaIdx
@@ -192,9 +197,23 @@ export default function PomodoroPage() {
                             : t
                     )
                 }))
-            }));
-            planService.toggleTema(temaId).catch(() => {});
+            };
+            setPlan(nuevoEstadoPlan);
             planService.registrarSesion(temaId).catch(() => {});
+
+            // Llamar API y detectar si el módulo quedó completo
+            planService.toggleTema(temaId)
+                .then(({ data }) => {
+                    if (data?.moduloCompletado && data?.moduloId) {
+                        setQuizLoading(true);
+                        setShowQuiz(true);
+                        planService.generarCuestionario(data.moduloId)
+                            .then(res => setQuiz(res.data))
+                            .catch(() => setShowQuiz(false))
+                            .finally(() => setQuizLoading(false));
+                    }
+                })
+                .catch(() => {});
         }
     };
 
@@ -355,17 +374,23 @@ export default function PomodoroPage() {
                                 </div>
 
 
-                                <div className="mt-3 flex-shrink-0 border-t border-neutral-800/60 pt-3">
-                                    <div className="flex justify-between text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
-                                        <span>Avance</span>
-                                        <span>{completedTopics}/{totalTopics} · {planProgress}%</span>
+                                <div className="mt-3 flex-shrink-0 border-t border-neutral-800/60 pt-3 flex flex-col gap-3">
+                                    <div>
+                                        <div className="flex justify-between text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+                                            <span>Avance</span>
+                                            <span>{completedTopics}/{totalTopics} · {planProgress}%</span>
+                                        </div>
+                                        <div className="h-1 w-full bg-neutral-800 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-violet-600 rounded-full transition-all duration-300"
+                                                style={{ width: `${planProgress}%` }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="h-1 w-full bg-neutral-800 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-violet-600 rounded-full transition-all duration-300"
-                                            style={{ width: `${planProgress}%` }}
-                                        />
-                                    </div>
+                                    <SocraticGuidePanel
+                                        temaActivo={temaActivo}
+                                        guiaSocratica={temaActivo?.guiaSocratica}
+                                    />
                                 </div>
                             </>
                         ) : (
@@ -396,6 +421,13 @@ export default function PomodoroPage() {
                     </div>
                 </div>
             </div>
+
+            <QuizModal
+                isOpen={showQuiz}
+                onClose={() => { setShowQuiz(false); setQuiz(null); }}
+                cuestionario={quiz}
+                loading={quizLoading}
+            />
 
             <SessionEndModal
                 isOpen={showEndModal}

@@ -51,6 +51,10 @@ public class PlanEstudio {
     @Builder.Default
     private int totalValidaciones = 0;
 
+    @Column(nullable = false, length = 7)
+    @Builder.Default
+    private String color = "#8b5cf6";
+
     @CreationTimestamp
     @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn;

@@ -17,6 +17,7 @@ public record PlanEstudioResponse(
         double ratioValidaciones,
         int totalValidaciones,
         LocalDateTime creadoEn,
+        String color,
         List<ModuloResponse> modulos,
         ProgresoResponse progreso
 ) {
@@ -46,6 +47,7 @@ public record PlanEstudioResponse(
                 plan.getRatioValidaciones(),
                 plan.getTotalValidaciones(),
                 plan.getCreadoEn(),
+                plan.getColor(),
                 modulos,
                 progreso
         );

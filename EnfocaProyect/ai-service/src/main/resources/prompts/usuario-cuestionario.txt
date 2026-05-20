@@ -1,0 +1,19 @@
+Genera un cuestionario de Active Recall para el módulo "{modulo_titulo}" que contiene los siguientes temas:
+
+{temas_lista}
+
+El cuestionario debe evaluar la comprensión real de los conceptos, no la memorización.
+
+Devuelve SOLO este JSON:
+{
+  "preguntas": [
+    {
+      "texto": "string",
+      "opciones": ["string", "string", "string", "string"],
+      "respuesta_correcta": 0,
+      "explicacion": "string"
+    }
+  ]
+}
+
+Donde "respuesta_correcta" es el índice (0-3) de la opción correcta en el array "opciones".

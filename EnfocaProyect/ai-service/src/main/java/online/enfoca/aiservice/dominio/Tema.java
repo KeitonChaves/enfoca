@@ -44,6 +44,9 @@ public class Tema {
     @Column(name = "completado_en")
     private LocalDateTime completadoEn;
 
+    @Column(name = "guia_socratica", columnDefinition = "TEXT")
+    private String guiaSocratica;
+
     // --- NUEVO: Relación con las fechas programadas ---
     @OneToMany(mappedBy = "tema", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderBy("fecha ASC")

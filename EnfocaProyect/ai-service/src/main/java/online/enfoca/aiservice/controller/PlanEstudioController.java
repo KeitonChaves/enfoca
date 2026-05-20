@@ -59,10 +59,17 @@ public class PlanEstudioController {
     }
 
     @PatchMapping("/temas/{temaId}/completado")
-    public ResponseEntity<TemaResponse> toggleTema(
+    public ResponseEntity<ToggleTemaResponse> toggleTema(
             @PathVariable UUID temaId,
             @RequestHeader("X-User-Id") String usuarioId) {
         return ResponseEntity.ok(servicio.toggleTema(temaId, usuarioId));
+    }
+
+    @PostMapping("/modulos/{moduloId}/cuestionario")
+    public ResponseEntity<CuestionarioResponse> generarCuestionario(
+            @PathVariable UUID moduloId,
+            @RequestHeader("X-User-Id") String usuarioId) {
+        return ResponseEntity.ok(servicio.generarCuestionario(moduloId, usuarioId));
     }
 
     @GetMapping("/catalogo")
