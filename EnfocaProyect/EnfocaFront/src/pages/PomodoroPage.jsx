@@ -11,7 +11,7 @@ const IconChevron = ({ open }) => (
     </svg>
 );
 
-function ModuleItem({ modulo, temaActivo, onToggle, onSelectTema }) {
+function ModuleItem({ modulo, temaActivo, moduleUnlocked, onToggle, onSelectTema }) {
     const [expanded, setExpanded] = useState(false);
     const completed = modulo.temas?.filter(t => t.completado).length ?? 0;
     const total     = modulo.temas?.length ?? 0;
@@ -39,11 +39,10 @@ function ModuleItem({ modulo, temaActivo, onToggle, onSelectTema }) {
                 <div className="pl-3 pb-1.5 flex flex-col gap-0.5 border-l border-neutral-800 ml-1.5 mt-0.5">
                     {modulo.temas?.map((tema, index) => {
                         const isActive = temaActivo?.id === tema.id;
-                        const prevAllDone = modulo.temas.slice(0, index).every(t => t.completado);
+                        // El módulo debe estar desbloqueado Y todos los temas anteriores dentro del módulo completos
+                        const prevAllDone = moduleUnlocked && modulo.temas.slice(0, index).every(t => t.completado);
                         const nextAnyDone = modulo.temas.slice(index + 1).some(t => t.completado);
-                        // Para marcar: todos los anteriores deben estar completos
-                        // Para desmarcar: ninguno de los siguientes puede estar completo
-                        const canToggle = tema.completado ? !nextAnyDone : prevAllDone;
+                        const canToggle = moduleUnlocked && (tema.completado ? !nextAnyDone : prevAllDone);
 
                         return (
                             <div
@@ -278,16 +277,23 @@ export default function PomodoroPage() {
                                 )}
 
                                 <div className="flex-grow overflow-y-auto pr-0.5 min-h-0 flex flex-col gap-0.5">
-                                    {plan.modulos?.map(modulo => (
-                                        <ModuleItem
-                                            key={modulo.id}
-                                            modulo={modulo}
-                                            temaActivo={temaActivo}
-                                            onToggle={toggleTopic}
-                                            onSelectTema={setTemaActivo}
-                                        />
-                                    ))}
+                                    {plan.modulos?.map((modulo, modIndex) => {
+                                        const moduleUnlocked = plan.modulos
+                                            .slice(0, modIndex)
+                                            .every(m => m.temas?.every(t => t.completado));
+                                        return (
+                                            <ModuleItem
+                                                key={modulo.id}
+                                                modulo={modulo}
+                                                temaActivo={temaActivo}
+                                                moduleUnlocked={moduleUnlocked}
+                                                onToggle={toggleTopic}
+                                                onSelectTema={setTemaActivo}
+                                            />
+                                        );
+                                    })}
                                 </div>
+
 
                                 <div className="mt-3 flex-shrink-0 border-t border-neutral-800/60 pt-3">
                                     <div className="flex justify-between text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
