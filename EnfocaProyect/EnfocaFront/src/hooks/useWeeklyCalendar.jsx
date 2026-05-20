@@ -21,7 +21,8 @@ export const useWeeklyCalendar = () => {
         return new Date(d.setDate(diff));
     };
 
-    const generateFullWeek = useCallback((apiDias) => {
+    // Genera los 7 días de la semana actual mezclados con datos de la API
+    const buildWeekDays = useCallback((apiDias) => {
         const start = getStartOfWeek(baseDate);
         return Array.from({ length: 7 }, (_, i) => {
             const day = new Date(start);
@@ -32,7 +33,8 @@ export const useWeeklyCalendar = () => {
         });
     }, [baseDate]);
 
-    const generateFullMonth = useCallback(() => {
+    // Genera todas las celdas del mes mezcladas con datos de la API
+    const buildMonthDays = useCallback((apiDias) => {
         const year  = baseDate.getFullYear();
         const month = baseDate.getMonth();
         const first = new Date(year, month, 1);
@@ -41,24 +43,26 @@ export const useWeeklyCalendar = () => {
         const days = [];
 
         for (let i = 0; i < startOffset; i++) days.push({ padding: true });
+
         for (let i = 1; i <= last.getDate(); i++) {
-            days.push({ fecha: formatDate(new Date(year, month, i)), dayNumber: i, temas: [] });
+            const dateStr = formatDate(new Date(year, month, i));
+            const found = apiDias?.find(d => d.fecha === dateStr);
+            days.push({ fecha: dateStr, dayNumber: i, temas: found?.temas ?? [] });
         }
         return days;
     }, [baseDate]);
 
-    const loadWeekData = useCallback(async () => {
+    const loadData = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const start = getStartOfWeek(baseDate);
-            const end   = new Date(start);
-            end.setDate(end.getDate() + 6);
+            // Consultar el mes completo — cubre tanto la vista semana como la vista mes
+            const year  = baseDate.getFullYear();
+            const month = baseDate.getMonth();
+            const fechaInicio = formatDate(new Date(year, month, 1));
+            const fechaFin    = formatDate(new Date(year, month + 1, 0));
 
-            const { data } = await calendarService.obtenerCalendario(
-                formatDate(start),
-                formatDate(end)
-            );
+            const { data } = await calendarService.obtenerCalendario(fechaInicio, fechaFin);
 
             const completados = data.reduce((acc, d) => acc + d.temas.filter(t => t.completado).length, 0);
             const total       = data.reduce((acc, d) => acc + d.temas.length, 0);
@@ -69,18 +73,22 @@ export const useWeeklyCalendar = () => {
                     temasCompletados: completados,
                     porcentajeAvance: total > 0 ? Math.round((completados / total) * 100) : 0,
                 },
-                dias: generateFullWeek(data),
-                mesDias: generateFullMonth(),
+                dias:    buildWeekDays(data),
+                mesDias: buildMonthDays(data),
             });
         } catch (err) {
             setError(err);
-            setWeekData({ resumen: { totalTemas: 0, temasCompletados: 0, porcentajeAvance: 0 }, dias: generateFullWeek([]), mesDias: generateFullMonth() });
+            setWeekData({
+                resumen: { totalTemas: 0, temasCompletados: 0, porcentajeAvance: 0 },
+                dias:    buildWeekDays([]),
+                mesDias: buildMonthDays([]),
+            });
         } finally {
             setIsLoading(false);
         }
-    }, [baseDate, generateFullWeek, generateFullMonth]);
+    }, [baseDate, buildWeekDays, buildMonthDays]);
 
-    useEffect(() => { loadWeekData(); }, [loadWeekData]);
+    useEffect(() => { loadData(); }, [loadData]);
 
     return {
         baseDate,
@@ -91,6 +99,6 @@ export const useWeeklyCalendar = () => {
         changeWeek:      (n) => { const d = new Date(baseDate); d.setDate(d.getDate() + n); setBaseDate(d); },
         changeMonth:     (n) => { const d = new Date(baseDate); d.setMonth(d.getMonth() + n); setBaseDate(d); },
         goToCurrentWeek: ()  => setBaseDate(new Date()),
-        refresh:         ()  => loadWeekData(),
+        refresh:         ()  => loadData(),
     };
 };

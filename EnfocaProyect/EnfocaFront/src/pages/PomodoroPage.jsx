@@ -198,8 +198,15 @@ export default function PomodoroPage() {
 
     const handleTimerComplete = () => {
         setSesionesCompletadas(prev => prev + 1);
-        if (temaActivo) {
-            planService.registrarSesion(temaActivo.id).catch(() => {});
+
+        // Si no hay tema activo, usar el primer tema incompleto del plan
+        const temaEfectivo = temaActivo
+            ?? plan?.modulos?.flatMap(m => m.temas).find(t => !t.completado)
+            ?? null;
+
+        if (temaEfectivo && temaEfectivo.id) {
+            planService.registrarSesion(temaEfectivo.id).catch(() => {});
+            if (!temaActivo) setTemaActivo(temaEfectivo);
         }
         setShowEndModal(true);
     };
