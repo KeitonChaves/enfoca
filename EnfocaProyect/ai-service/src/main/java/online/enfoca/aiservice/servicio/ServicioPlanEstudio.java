@@ -13,12 +13,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import online.enfoca.aiservice.dto.ProgramacionCalendarioDTO;
+import online.enfoca.aiservice.dto.TemaCalendarioDTO;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ServicioPlanEstudio {
@@ -32,6 +33,7 @@ public class ServicioPlanEstudio {
     private final ModuloRepositorio moduloRepositorio;
     private final TemaRepositorio temaRepositorio;
     private final ValidacionRepositorio validacionRepositorio;
+    private final ProgramacionRepositorio programacionRepositorio;
     private final ServicioIa servicioIa;
     private final ConstructorPrompt constructorPrompt;
     private final ObjectMapper objectMapper;
@@ -40,6 +42,7 @@ public class ServicioPlanEstudio {
                                ModuloRepositorio moduloRepositorio,
                                TemaRepositorio temaRepositorio,
                                ValidacionRepositorio validacionRepositorio,
+                               ProgramacionRepositorio programacionRepositorio,
                                ServicioIa servicioIa,
                                ConstructorPrompt constructorPrompt,
                                ObjectMapper objectMapper) {
@@ -47,6 +50,7 @@ public class ServicioPlanEstudio {
         this.moduloRepositorio = moduloRepositorio;
         this.temaRepositorio = temaRepositorio;
         this.validacionRepositorio = validacionRepositorio;
+        this.programacionRepositorio = programacionRepositorio;
         this.servicioIa = servicioIa;
         this.constructorPrompt = constructorPrompt;
         this.objectMapper = objectMapper;
@@ -268,6 +272,48 @@ public class ServicioPlanEstudio {
 
         temaRepositorio.save(tema);
         log.info("Tema {} programado para {} fechas por el usuario {}", temaId, request.fechas().size(), usuarioId);
+    }
+
+    public List<ProgramacionCalendarioDTO> obtenerCalendario(String usuarioId, LocalDate fechaInicio, LocalDate fechaFin) {
+        List<Programacion> programaciones = programacionRepositorio
+                .findByUsuarioIdAndFechaBetween(usuarioId, fechaInicio, fechaFin);
+
+        Map<LocalDate, List<Programacion>> porFecha = programaciones.stream()
+                .collect(Collectors.groupingBy(Programacion::getFecha));
+
+        return porFecha.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> {
+                    List<TemaCalendarioDTO> temas = entry.getValue().stream()
+                            .map(p -> new TemaCalendarioDTO(
+                                    p.getTema().getId(),
+                                    p.getTema().getTitulo(),
+                                    p.getTema().getModulo().getTitulo(),
+                                    p.getTema().getModulo().getPlan().getTitulo(),
+                                    p.getTema().isCompletado(),
+                                    p.getTema().getPomodorosCompletados(),
+                                    p.getTema().getPomodorosEstimados()))
+                            .collect(Collectors.toList());
+                    return new ProgramacionCalendarioDTO(entry.getKey().toString(), temas);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void registrarSesionHoy(UUID temaId, String usuarioId) {
+        Tema tema = temaRepositorio.findById(temaId)
+                .orElseThrow(() -> new NoSuchElementException("Tema no encontrado: " + temaId));
+
+        if (!usuarioId.equals(tema.getModulo().getPlan().getUsuarioId())) {
+            throw new SecurityException("Acceso no autorizado al tema");
+        }
+
+        LocalDate hoy = LocalDate.now();
+        if (!programacionRepositorio.existsByTemaIdAndFecha(temaId, hoy)) {
+            Programacion prog = Programacion.builder().tema(tema).fecha(hoy).build();
+            programacionRepositorio.save(prog);
+            log.info("Sesión de hoy registrada en calendario para tema {} usuario {}", temaId, usuarioId);
+        }
     }
 
 }

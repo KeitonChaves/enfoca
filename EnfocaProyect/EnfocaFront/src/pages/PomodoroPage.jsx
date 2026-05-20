@@ -179,7 +179,7 @@ export default function PomodoroPage() {
             // Llamar API por cada uno
             idsADesmarcar.forEach(id => planService.toggleTema(id).catch(() => {}));
         } else {
-            // MARCAR — solo este tema
+            // MARCAR — solo este tema + registrar hoy en calendario
             setPlan(prev => ({
                 ...prev,
                 modulos: prev.modulos.map((m, mi) => ({
@@ -192,11 +192,15 @@ export default function PomodoroPage() {
                 }))
             }));
             planService.toggleTema(temaId).catch(() => {});
+            planService.registrarSesion(temaId).catch(() => {});
         }
     };
 
     const handleTimerComplete = () => {
         setSesionesCompletadas(prev => prev + 1);
+        if (temaActivo) {
+            planService.registrarSesion(temaActivo.id).catch(() => {});
+        }
         setShowEndModal(true);
     };
 
