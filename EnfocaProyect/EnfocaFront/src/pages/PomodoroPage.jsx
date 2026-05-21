@@ -235,9 +235,14 @@ export default function PomodoroPage() {
     };
 
     const handleTopicComplete = async (temaId) => {
-        const tema = plan?.modulos?.flatMap(m => m.temas).find(t => t.id === temaId);
-        if (tema && !tema.completado) {
-            await toggleTopic(temaId);
+        // temaId puede ser null si no hay tema activo — usar primer tema incompleto
+        const idEfectivo = temaId
+            ?? temaActivo?.id
+            ?? plan?.modulos?.flatMap(m => m.temas).find(t => !t.completado)?.id;
+
+        if (idEfectivo) {
+            const tema = plan?.modulos?.flatMap(m => m.temas).find(t => t.id === idEfectivo);
+            if (tema && !tema.completado) await toggleTopic(idEfectivo);
         }
         setShowEndModal(false);
         setTemaActivo(null);
@@ -245,8 +250,12 @@ export default function PomodoroPage() {
     };
 
     const handleTopicSchedule = async (fechas) => {
-        if (temaActivo?.id) {
-            await planService.programar(temaActivo.id, fechas).catch(() => {});
+        // temaActivo puede ser null por asincronía — buscar primer tema incompleto como fallback
+        const idEfectivo = temaActivo?.id
+            ?? plan?.modulos?.flatMap(m => m.temas).find(t => !t.completado)?.id;
+
+        if (idEfectivo) {
+            await planService.programar(idEfectivo, fechas).catch(() => {});
         }
         setShowEndModal(false);
         navigate('/dashboard');
