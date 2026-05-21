@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SessionEndModal from '../components/timer/SessionEndModal';
+import QuizModal from '../components/study/QuizModal';
 import { planService } from '../services/api';
 
 const STREAM_URL  = 'https://stream.zeno.fm/f3wvbbqmdg8uv';
@@ -47,9 +48,12 @@ export default function FocusModePage() {
     const [prepLeft, setPrepLeft] = useState(10);
     const [timeLeft, setTimeLeft] = useState(state.currentTimeLeft ?? focusDuration);
 
-    const [volume, setVolume] = useState(0.7);
-    const audioRef = useRef(null);
+    const [volume, setVolume]     = useState(0.7);
+    const audioRef                = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [quiz, setQuiz]         = useState(null);
+    const [quizLoading, setQuizLoading] = useState(false);
+    const [showQuiz, setShowQuiz] = useState(false);
 
     const toggleTopic = async (temaId) => {
         if (!plan) return;
@@ -88,8 +92,19 @@ export default function FocusModePage() {
                     )
                 }))
             }));
-            planService.toggleTema(temaId).catch(() => {});
             planService.registrarSesion(temaId).catch(() => {});
+            planService.toggleTema(temaId)
+                .then(({ data }) => {
+                    if (data?.moduloCompletado && data?.moduloId) {
+                        setQuizLoading(true);
+                        setShowQuiz(true);
+                        planService.generarCuestionario(data.moduloId)
+                            .then(res => setQuiz(res.data))
+                            .catch(() => setShowQuiz(false))
+                            .finally(() => setQuizLoading(false));
+                    }
+                })
+                .catch(() => {});
         }
     };
 
@@ -381,12 +396,23 @@ export default function FocusModePage() {
                     navigate('/dashboard');
                 }}
                 onSchedule={async (fechas) => {
-                    if (topic?.id) {
-                        planService.programar(topic.id, fechas).catch(() => {});
+                    const todosLosTemas = plan?.modulos?.flatMap(m => m.temas) ?? [];
+                    const idEfectivo = topic?.id
+                        ?? todosLosTemas.find(t => !t.completado)?.id
+                        ?? todosLosTemas[0]?.id;
+                    if (idEfectivo && fechas?.length > 0) {
+                        await planService.programar(idEfectivo, fechas).catch(console.error);
                     }
                     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
                     navigate('/dashboard');
                 }}
+            />
+
+            <QuizModal
+                isOpen={showQuiz}
+                onClose={() => { setShowQuiz(false); setQuiz(null); }}
+                cuestionario={quiz}
+                loading={quizLoading}
             />
 
             </div>
