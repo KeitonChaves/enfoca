@@ -37,7 +37,8 @@ export default function WeeklyCalendarPage() {
         error,
         changeWeek,
         changeMonth,
-        goToCurrentWeek
+        goToCurrentWeek,
+        refresh,
     } = useWeeklyCalendar();
 
     // 1. Abre el modal al hacer clic en la tarjeta (en cualquier vista)

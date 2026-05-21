@@ -69,7 +69,7 @@ export default function DetailedDayView({ dayData, onTopicClick, onDelete }) {
                                         <button
                                             onClick={(e) => { e.stopPropagation(); onDelete(tema.id, dayData.fecha); }}
                                             title="Eliminar del calendario"
-                                            className="flex-shrink-0 p-2 rounded-lg text-neutral-700 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all opacity-0 group-hover:opacity-100"
+                                            className="flex-shrink-0 p-2 rounded-lg text-neutral-600 hover:text-red-400 hover:bg-red-500/10 border border-neutral-800 hover:border-red-500/20 transition-all"
                                         >
                                             <IconTrash />
                                         </button>
