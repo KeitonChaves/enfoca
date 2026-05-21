@@ -30,14 +30,16 @@ export default function SessionEndModal({ isOpen, onClose, topic, onComplete, on
         }
 
         if (dates.length > 0) {
-            await onSchedule(dates);
+            onClose();
+            onSchedule(dates).catch(() => {});
             navigate('/dashboard');
         }
     };
 
     const handleComplete = async () => {
-        await onComplete(topic.id);
-        navigate('/dashboard'); // 3. Navegamos después de la acción
+        onClose();
+        onComplete(topic.id).catch(() => {});
+        navigate('/dashboard');
     };
 
     const calculateNextDates = (targetDays, weeksAhead) => {

@@ -380,7 +380,10 @@ export default function FocusModePage() {
                     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
                     navigate('/dashboard');
                 }}
-                onSchedule={() => {
+                onSchedule={async (fechas) => {
+                    if (topic?.id) {
+                        planService.programar(topic.id, fechas).catch(() => {});
+                    }
                     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
                     navigate('/dashboard');
                 }}
