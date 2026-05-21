@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { planService } from '../services/api';
+import { getPlanImage, getPlanBgFallback } from '../utils/planImage';
 
 
 const TIME_OPTIONS = [
@@ -445,8 +446,14 @@ export default function StudyPlanPage() {
                                     planMostrado?.id === plan.id ? 'border-violet-500/40' : 'border-neutral-800/60'
                                 }`}
                             >
-                                <div className={`h-36 bg-gradient-to-b ${CARD_PALETTE[idx % CARD_PALETTE.length]} to-neutral-900 relative flex items-end p-3`}>
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-transparent to-transparent"/>
+                                <div className={`h-36 bg-gradient-to-b ${getPlanBgFallback(idx)} to-neutral-900 relative flex items-end p-3 overflow-hidden`}>
+                                    <img
+                                        src={getPlanImage(plan.titulo)}
+                                        alt={plan.titulo}
+                                        className="absolute inset-0 w-full h-full object-cover opacity-60"
+                                        onError={e => { e.target.style.display = 'none'; }}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-black/20 to-transparent"/>
                                     <div className="relative z-10 flex items-center gap-1.5">
                                         <span className={`text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded ${TAG_COLORS[plan.estado] ?? 'bg-neutral-700'} text-white`}>
                                             {TAG_LABELS[plan.estado] ?? plan.estado}
