@@ -33,16 +33,6 @@ export default function CalendarTopicCard({ topic, onClick, onStartFocus }) {
             className={`w-full text-left p-2.5 rounded-lg border transition-all hover:shadow-md cursor-pointer group flex flex-col gap-1.5 relative ${stateClasses}`}
             style={!isCompleted ? { borderLeftColor: planColor, borderLeftWidth: '3px' } : {}}
         >
-            {/* Etiqueta del plan */}
-            {topic.planTitulo && (
-                <span
-                    className="self-start text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider uppercase truncate max-w-full"
-                    style={{ backgroundColor: planColor + '22', color: planColor }}
-                >
-                    {topic.planTitulo}
-                </span>
-            )}
-
             <div className="flex items-start justify-between gap-2">
                 <h4 className={`text-xs font-medium leading-tight line-clamp-2 pr-4 ${isCompleted ? 'text-green-800 dark:text-green-300' : 'text-neutral-800 dark:text-neutral-200'}`}>
                     {topic.titulo}
@@ -63,6 +53,16 @@ export default function CalendarTopicCard({ topic, onClick, onStartFocus }) {
                     {topic.pomodorosCompletados}/{topic.pomodorosEstimados}
                 </span>
             </div>
+
+            {/* Etiqueta del plan */}
+            {topic.planTitulo && (
+                <span
+                    className="self-start text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider uppercase truncate max-w-full"
+                    style={{ backgroundColor: planColor + '22', color: planColor }}
+                >
+                    {topic.planTitulo}
+                </span>
+            )}
 
             {isInProgress && (
                 <div className="w-full h-1 bg-neutral-100 dark:bg-neutral-800 rounded-full mt-1 overflow-hidden">
