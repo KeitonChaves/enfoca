@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { pomodoroService, metricsService } from '../../services/api';
 import SessionConfigModal from './SessionConfigModal';
 
@@ -18,7 +18,7 @@ const STREAM_URL      = 'https://stream.zeno.fm/f3wvbbqmdg8uv';
 const PREP_TIME       = 10;
 
 // 🔴 IMPORTANTE: Asegúrate de que onConfigChange esté escrito aquí
-export default function MainTimerCard({ autoOpenConfig = false, onComplete, onConfigChange, onPhaseChange, stopRequested = false }) {
+const MainTimerCard = forwardRef(function MainTimerCard({ autoOpenConfig = false, onComplete, onConfigChange, onPhaseChange, stopRequested = false }, ref) {
 
     const [phase, setPhase]       = useState('IDLE');
     const [sessionId, setSessionId] = useState(null);
@@ -37,6 +37,17 @@ export default function MainTimerCard({ autoOpenConfig = false, onComplete, onCo
     const [volume,     setVolume]     = useState(0.7);
     const lastVolume   = useRef(0.7);
     const audioRef     = useRef(null);
+
+    useImperativeHandle(ref, () => ({
+        getTimerState: () => ({ phase, timeLeft, roundsLeft, sessionConfig }),
+        pause: () => {
+            if (phase === 'RUNNING' || phase === 'BREAK') {
+                pausedFrom.current = phase;
+                audioRef.current?.pause();
+                setPhase('PAUSED');
+            }
+        },
+    }));
 
     useEffect(() => {
         if (audioRef.current) audioRef.current.volume = volume;
@@ -334,4 +345,6 @@ export default function MainTimerCard({ autoOpenConfig = false, onComplete, onCo
             </div>
         </>
     );
-}
+});
+
+export default MainTimerCard;

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MainTimerCard from '../components/timer/MainTimerCard';
 import SessionEndModal from '../components/timer/SessionEndModal';
@@ -126,6 +126,7 @@ export default function PomodoroPage() {
     const [sesionesCompletadas, setSesionesCompletadas] = useState(0);
     const [timerPhase, setTimerPhase]     = useState('IDLE');
     const [stopRequested, setStopRequested] = useState(false);
+    const timerRef = useRef(null);
     const [quiz, setQuiz]                 = useState(null);
     const [quizLoading, setQuizLoading]   = useState(false);
     const [showQuiz, setShowQuiz]         = useState(false);
@@ -262,18 +263,25 @@ export default function PomodoroPage() {
                 <div className="hidden md:flex items-center gap-4 text-[10px] font-mono tracking-widest uppercase">
                     <span className="text-violet-400 cursor-pointer">Focus_Session</span>
                     <button
-                        onClick={() => navigate('/focus-mode', {
-                            state: {
-                                plan,
-                                topic: temaActivo ?? (plan ? { titulo: plan.titulo } : null),
-                                focusDuration: timerConfig.focus * 60,
-                                shortBreakDuration: timerConfig.break * 60,
-                                sesionesCompletadas,
-                                longBreakFreq: timerConfig.longBreakFreq,
-                                longBreakDuration: timerConfig.longBreak * 60,
-                                totalRounds: timerConfig.rounds
-                            }
-                        })}
+                        onClick={() => {
+                            const ts = timerRef.current?.getTimerState() ?? {};
+                            timerRef.current?.pause();
+                            navigate('/focus-mode', {
+                                state: {
+                                    plan,
+                                    topic: temaActivo ?? (plan ? { titulo: plan.titulo } : null),
+                                    focusDuration: timerConfig.focus * 60,
+                                    shortBreakDuration: timerConfig.break * 60,
+                                    longBreakFreq: timerConfig.longBreakFreq,
+                                    longBreakDuration: timerConfig.longBreak * 60,
+                                    totalRounds: timerConfig.rounds,
+                                    sesionesCompletadas,
+                                    currentTimeLeft: ts.timeLeft,
+                                    currentPhase: ts.phase,
+                                    currentRoundsLeft: ts.roundsLeft,
+                                }
+                            });
+                        }}
                         className="flex items-center gap-2 px-3 py-1.5 bg-violet-600/10 text-violet-400 hover:bg-violet-600/20 border border-violet-500/20 rounded-lg transition-all font-semibold"
                     >
                         <Maximize2 className="w-3.5 h-3.5" />
@@ -285,6 +293,7 @@ export default function PomodoroPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start flex-grow">
                 <div className="lg:col-span-8 flex flex-col gap-4">
                     <MainTimerCard
+                        ref={timerRef}
                         autoOpenConfig={autoOpenConfig}
                         onComplete={handleTimerComplete}
                         onConfigChange={handleConfigChange}

@@ -34,11 +34,18 @@ export default function FocusModePage() {
     const longBreakDuration  = state.longBreakDuration || 15 * 60;
     const totalRounds        = state.totalRounds || 4;
 
-    const [mode, setMode] = useState('focus');
-    const [sesionesCompletadas, setSesionesCompletadas] = useState(state.sesionesCompletadas || 0);
-    const [phase, setPhase] = useState('PREPARING');
+    // Si viene del Pomodoro con timer activo, retomar desde donde iba
+    const resuming = state.currentPhase === 'RUNNING' || state.currentPhase === 'PAUSED' || state.currentPhase === 'BREAK';
+
+    const [mode, setMode] = useState(state.currentPhase === 'BREAK' ? 'shortBreak' : 'focus');
+    const [sesionesCompletadas, setSesionesCompletadas] = useState(
+        state.currentRoundsLeft != null
+            ? (state.totalRounds || 4) - state.currentRoundsLeft
+            : (state.sesionesCompletadas || 0)
+    );
+    const [phase, setPhase]   = useState(resuming ? (state.currentPhase === 'RUNNING' ? 'RUNNING' : 'PAUSED') : 'PREPARING');
     const [prepLeft, setPrepLeft] = useState(10);
-    const [timeLeft, setTimeLeft] = useState(focusDuration);
+    const [timeLeft, setTimeLeft] = useState(state.currentTimeLeft ?? focusDuration);
 
     const [volume, setVolume] = useState(0.7);
     const audioRef = useRef(null);
