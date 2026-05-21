@@ -359,6 +359,17 @@ public class ServicioPlanEstudio {
     }
 
     @Transactional
+    public void eliminarProgramacion(UUID temaId, String usuarioId, LocalDate fecha) {
+        Tema tema = temaRepositorio.findById(temaId)
+                .orElseThrow(() -> new NoSuchElementException("Tema no encontrado: " + temaId));
+        if (!usuarioId.equals(tema.getModulo().getPlan().getUsuarioId())) {
+            throw new SecurityException("Acceso no autorizado al tema");
+        }
+        programacionRepositorio.deleteByTemaIdAndFecha(temaId, fecha);
+        log.info("Programación de {} para {} eliminada por usuario {}", temaId, fecha, usuarioId);
+    }
+
+    @Transactional
     public void registrarSesionHoy(UUID temaId, String usuarioId) {
         Tema tema = temaRepositorio.findById(temaId)
                 .orElseThrow(() -> new NoSuchElementException("Tema no encontrado: " + temaId));

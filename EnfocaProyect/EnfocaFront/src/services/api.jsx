@@ -63,7 +63,8 @@ export const planService = {
     catalogo:   ()        => api.get('/planes-estudio/catalogo'),
     toggleTema:          (temaId)        => api.patch(`/planes-estudio/temas/${temaId}/completado`),
     programar:           (temaId, fechas) => api.post(`/planes-estudio/temas/${temaId}/programar`, { fechas }),
-    registrarSesion:     (temaId)        => api.post(`/planes-estudio/temas/${temaId}/sesion-hoy`),
+    registrarSesion:         (temaId)         => api.post(`/planes-estudio/temas/${temaId}/sesion-hoy`),
+    eliminarProgramacion:    (temaId, fecha)  => api.delete(`/planes-estudio/temas/${temaId}/programacion/${fecha}`),
     generarCuestionario: (moduloId)      => api.post(`/planes-estudio/modulos/${moduloId}/cuestionario`),
 };
 

@@ -99,6 +99,15 @@ public class PlanEstudioController {
         return ResponseEntity.ok(servicio.obtenerCalendario(usuarioId, fechaInicio, fechaFin));
     }
 
+    @DeleteMapping("/temas/{temaId}/programacion/{fecha}")
+    public ResponseEntity<Void> eliminarProgramacion(
+            @PathVariable UUID temaId,
+            @PathVariable LocalDate fecha,
+            @RequestHeader("X-User-Id") String usuarioId) {
+        servicio.eliminarProgramacion(temaId, usuarioId, fecha);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/temas/{temaId}/sesion-hoy")
     public ResponseEntity<Void> registrarSesionHoy(
             @PathVariable UUID temaId,

@@ -7,7 +7,8 @@ import WeeklyGrid from '../components/calendar/WeeklyGrid';
 import WeeklySummarySidebar from '../components/calendar/WeeklySummarySidebar';
 import MonthView from '../components/calendar/MonthView';
 import DetailedDayView from '../components/calendar/DetailedDayView';
-import TopicDetailModal from '../components/calendar/TopicDetailModal'; // <-- Importamos el Modal
+import TopicDetailModal from '../components/calendar/TopicDetailModal';
+import { planService } from '../services/api';
 
 export default function WeeklyCalendarPage() {
     const navigate = useNavigate();
@@ -51,11 +52,13 @@ export default function WeeklyCalendarPage() {
         navigate('/pomodoro', { state: { targetTopic: topic } });
     };
 
-    // 3. Maneja la reprogramación de la fecha
     const handleMoveDate = (topic, newDateStr) => {
         console.log(`[API Mock] Moviendo tema "${topic.titulo}" al día ${newDateStr}`);
-        // TODO: Aquí irá la llamada a tu backend: planService.reprogramar(topic.id, newDateStr)
-        // Y luego puedes recargar los datos: refreshData()
+    };
+
+    const handleDeleteProgramacion = async (temaId, fecha) => {
+        await planService.eliminarProgramacion(temaId, fecha).catch(console.error);
+        refresh();
     };
 
     // Al hacer clic en un día (desde el mes o semana), cambiamos a la vista de "Día"
@@ -182,6 +185,7 @@ export default function WeeklyCalendarPage() {
                                 <DetailedDayView
                                     dayData={activeDayData}
                                     onTopicClick={handleOpenModal}
+                                    onDelete={handleDeleteProgramacion}
                                 />
                             )}
                         </>

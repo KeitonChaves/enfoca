@@ -2,6 +2,7 @@ package online.enfoca.aiservice.repositorio;
 
 import online.enfoca.aiservice.dominio.Programacion;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -12,6 +13,10 @@ import java.util.UUID;
 public interface ProgramacionRepositorio extends JpaRepository<Programacion, UUID> {
 
     void deleteByTemaId(UUID temaId);
+
+    @Modifying
+    @Query("DELETE FROM Programacion p WHERE p.tema.id = :temaId AND p.fecha = :fecha")
+    void deleteByTemaIdAndFecha(@Param("temaId") UUID temaId, @Param("fecha") LocalDate fecha);
 
     @Query("SELECT p FROM Programacion p " +
            "JOIN FETCH p.tema t JOIN FETCH t.modulo m JOIN FETCH m.plan pl " +
