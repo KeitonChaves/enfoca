@@ -124,9 +124,10 @@ export default function PomodoroPage() {
     const [temaActivo, setTemaActivo]     = useState(null);
     const [showEndModal, setShowEndModal] = useState(false);
     const [sesionesCompletadas, setSesionesCompletadas] = useState(0);
-    const [timerPhase, setTimerPhase]     = useState('IDLE');
+    const [timerPhase, setTimerPhase]       = useState('IDLE');
     const [stopRequested, setStopRequested] = useState(false);
-    const timerRef = useRef(null);
+    const timerRef      = useRef(null);
+    const temaIdRef     = useRef(null);  // ref síncrono para garantizar el ID al abrir el modal
     const [quiz, setQuiz]                 = useState(null);
     const [quizLoading, setQuizLoading]   = useState(false);
     const [showQuiz, setShowQuiz]         = useState(false);
@@ -228,6 +229,7 @@ export default function PomodoroPage() {
             ?? null;
 
         if (temaEfectivo && temaEfectivo.id) {
+            temaIdRef.current = temaEfectivo.id;   // guardar síncronamente
             planService.registrarSesion(temaEfectivo.id).catch(() => {});
             if (!temaActivo) setTemaActivo(temaEfectivo);
         }
@@ -250,12 +252,16 @@ export default function PomodoroPage() {
     };
 
     const handleTopicSchedule = async (fechas) => {
-        // temaActivo puede ser null por asincronía — buscar primer tema incompleto como fallback
-        const idEfectivo = temaActivo?.id
+        const idEfectivo = temaIdRef.current
+            ?? temaActivo?.id
             ?? plan?.modulos?.flatMap(m => m.temas).find(t => !t.completado)?.id;
 
-        if (idEfectivo) {
-            await planService.programar(idEfectivo, fechas).catch(() => {});
+        if (idEfectivo && fechas?.length > 0) {
+            try {
+                await planService.programar(idEfectivo, fechas);
+            } catch (err) {
+                console.error('Error al programar tema:', err?.response?.data ?? err.message);
+            }
         }
         setShowEndModal(false);
         navigate('/dashboard');
