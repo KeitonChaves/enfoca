@@ -252,9 +252,13 @@ export default function PomodoroPage() {
     };
 
     const handleTopicSchedule = async (fechas) => {
+        const todosLosTemas = plan?.modulos?.flatMap(m => m.temas) ?? [];
+
+        // Prioridad: ref síncrono → estado activo → primer incompleto → cualquier tema del plan
         const idEfectivo = temaIdRef.current
             ?? temaActivo?.id
-            ?? plan?.modulos?.flatMap(m => m.temas).find(t => !t.completado)?.id;
+            ?? todosLosTemas.find(t => !t.completado)?.id
+            ?? todosLosTemas[0]?.id;   // fallback: usar el primer tema aunque esté completado (repaso)
 
         if (idEfectivo && fechas?.length > 0) {
             try {
