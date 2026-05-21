@@ -260,16 +260,8 @@ export default function PomodoroPage() {
             ?? todosLosTemas.find(t => !t.completado)?.id
             ?? todosLosTemas[0]?.id;   // fallback: usar el primer tema aunque esté completado (repaso)
 
-        console.log('[Schedule] idEfectivo:', idEfectivo, '| fechas:', fechas, '| plan:', plan?.titulo);
         if (idEfectivo && fechas?.length > 0) {
-            try {
-                await planService.programar(idEfectivo, fechas);
-                console.log('[Schedule] ✓ programar OK');
-            } catch (err) {
-                console.error('[Schedule] ✗ error:', err?.response?.status, err?.response?.data ?? err.message);
-            }
-        } else {
-            console.warn('[Schedule] Saltado — idEfectivo:', idEfectivo, 'fechas.length:', fechas?.length);
+            await planService.programar(idEfectivo, fechas).catch(console.error);
         }
         setShowEndModal(false);
         navigate('/dashboard');

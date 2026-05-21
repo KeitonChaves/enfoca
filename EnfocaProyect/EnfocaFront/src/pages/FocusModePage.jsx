@@ -113,8 +113,6 @@ export default function FocusModePage() {
     }, [volume]);
 
     useEffect(() => {
-        const el = document.documentElement;
-        if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
         return () => { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); };
     }, []);
 
