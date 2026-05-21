@@ -19,19 +19,19 @@ export default function SessionEndModal({ isOpen, onClose, topic, onComplete, on
         setSelectedDays(prev => prev.includes(dayId) ? prev.filter(d => d !== dayId) : [...prev, dayId]);
     };
 
-    const handleSchedule = async () => {
+    const handleSchedule = async (mode = scheduleMode) => {
         let dates = [];
-        if (scheduleMode === 'quick') {
+        if (mode === 'quick') {
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             dates = [tomorrow.toISOString().split('T')[0]];
-        } else if (scheduleMode === 'custom' && selectedDays.length > 0) {
+        } else if (mode === 'custom' && selectedDays.length > 0) {
             dates = calculateNextDates(selectedDays, 4);
         }
 
         if (dates.length > 0) {
             await onSchedule(dates);
-            navigate('/dashboard'); // 3. Navegamos después de la acción
+            navigate('/dashboard');
         }
     };
 
@@ -90,7 +90,7 @@ export default function SessionEndModal({ isOpen, onClose, topic, onComplete, on
                                         <div className="flex-grow border-t border-neutral-800"></div>
                                     </div>
                                     <button
-                                        onClick={() => { setScheduleMode('quick'); handleSchedule(); }}
+                                        onClick={() => handleSchedule('quick')}
                                         className="w-full bg-neutral-800 hover:bg-neutral-700 text-white py-3 rounded-lg flex items-center justify-center gap-2 transition-all"
                                     >
                                         <RotateCcw className="w-4 h-4" /> Repetir Mañana
