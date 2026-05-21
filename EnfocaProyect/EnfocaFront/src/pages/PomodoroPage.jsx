@@ -241,13 +241,15 @@ export default function PomodoroPage() {
         }
         setShowEndModal(false);
         setTemaActivo(null);
+        navigate('/dashboard');
     };
 
     const handleTopicSchedule = async (fechas) => {
-        if (temaActivo) {
+        if (temaActivo?.id) {
             await planService.programar(temaActivo.id, fechas).catch(() => {});
         }
         setShowEndModal(false);
+        navigate('/dashboard');
     };
 
     const isLongBreak = sesionesCompletadas > 0 && sesionesCompletadas % timerConfig.longBreakFreq === 0;
