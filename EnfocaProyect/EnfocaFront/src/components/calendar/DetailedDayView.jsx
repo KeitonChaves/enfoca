@@ -80,7 +80,7 @@ export default function DetailedDayView({ dayData, onTopicClick, onDelete }) {
                     })
                 ) : (
                     <div className="text-center py-12 border border-dashed border-neutral-800 rounded-xl">
-                        <p className="font-mono text-xs text-neutral-500 uppercase tracking-widest">// NO TASKS ALLOCATED FOR THIS INDEX</p>
+                        <p className="text-sm text-neutral-500">No hay temas programados para este día</p>
                     </div>
                 )}
             </div>
