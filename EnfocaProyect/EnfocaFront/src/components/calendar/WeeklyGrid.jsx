@@ -53,13 +53,7 @@ export default function WeeklyGrid({ days, onDayClick, onTopicClick, onStartFocu
                                             onStartFocus={onStartFocus} // Pasamos la función
                                         />
                                     ))
-                                ) : (
-                                    <div onClick={() => onDayClick(day.fecha)} className="h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                                        <span className="text-[9px] font-mono text-neutral-600 uppercase tracking-widest border border-dashed border-neutral-800 rounded-lg p-2 w-full text-center hover:border-neutral-700 hover:text-neutral-400">
-                                            + Allocate
-                                        </span>
-                                    </div>
-                                )}
+                                ) : null}
                             </div>
                         </div>
                     );
