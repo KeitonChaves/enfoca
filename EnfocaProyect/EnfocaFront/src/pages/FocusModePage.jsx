@@ -356,20 +356,21 @@ export default function FocusModePage() {
                 )}
 
                 {topic && <p className="mt-8 text-xs font-mono text-neutral-500 tracking-widest uppercase">{topic.titulo}</p>}
+
+                {/* Barra de progreso — dentro del timer para mantener el centrado */}
+                {phase !== 'PREPARING' && (
+                    <div className="w-full max-w-sm px-4 pb-6 mt-8">
+                        <div className="h-px w-full bg-neutral-800 rounded-full mb-3 overflow-hidden">
+                            <div className={`h-full rounded-full transition-all duration-1000 ${phase === 'IDLE' ? 'bg-violet-500' : (mode === 'focus' ? 'bg-violet-500' : 'bg-emerald-500')}`} style={{ width: `${progress}%` }} />
+                        </div>
+                        <div className="flex justify-between text-[9px] font-mono text-neutral-600 uppercase tracking-widest">
+                            <span>{fmt(elapsed).m}m {fmt(elapsed).s}s transcurrido</span>
+                            <span>{m}m {s}s restante</span>
+                        </div>
+                    </div>
+                )}
                 </div>{/* fin timer centrado */}
             </div>{/* fin flex-row */}
-
-            {phase !== 'PREPARING' && (
-                <div className="relative z-10 flex-shrink-0 px-8 pb-6 w-full max-w-lg mx-auto">
-                    <div className="h-px w-full bg-neutral-800 rounded-full mb-3 overflow-hidden">
-                        <div className={`h-full rounded-full transition-all duration-1000 ${phase === 'IDLE' ? 'bg-violet-500' : (mode === 'focus' ? 'bg-violet-500' : 'bg-emerald-500')}`} style={{ width: `${progress}%` }} />
-                    </div>
-                    <div className="flex justify-between text-[9px] font-mono text-neutral-600 uppercase tracking-widest">
-                        <span>{fmt(elapsed).m}m {fmt(elapsed).s}s transcurrido</span>
-                        <span>{m}m {s}s restante</span>
-                    </div>
-                </div>
-            )}
 
             <SessionEndModal
                 isOpen={isModalOpen}
