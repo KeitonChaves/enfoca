@@ -40,14 +40,20 @@ export default function SessionEndModal({ isOpen, onClose, topic, onComplete, on
     };
 
     const handleSchedule = async (mode = scheduleMode) => {
+        console.log('[Modal] handleSchedule llamado', { mode, selectedDays, scheduleMode });
         const dates = buildDates(mode);
-        if (!dates.length) return;
+        console.log('[Modal] fechas generadas:', dates);
+
+        if (!dates.length) {
+            console.warn('[Modal] dates vacío — retornando sin guardar');
+            return;
+        }
 
         setSaving(true);
         try {
             await onSchedule(dates);
-        } catch {
-            // el padre maneja errores
+        } catch (e) {
+            console.error('[Modal] error en onSchedule:', e);
         } finally {
             setSaving(false);
         }
@@ -152,7 +158,7 @@ export default function SessionEndModal({ isOpen, onClose, topic, onComplete, on
                                             ← Volver
                                         </button>
                                         <button
-                                            onClick={() => handleSchedule('custom')}
+                                            onClick={() => { console.log('[Modal] btn Confirmar, selectedDays:', selectedDays, 'saving:', saving); handleSchedule('custom'); }}
                                             disabled={selectedDays.length === 0 || saving}
                                             className="flex-1 bg-violet-600 hover:bg-violet-500 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                         >
