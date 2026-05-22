@@ -15,6 +15,8 @@ function fmt(secs) {
 const IconPlay = () => ( <svg className="w-6 h-6 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg> );
 const IconPause = () => ( <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg> );
 const IconClose = () => ( <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg> );
+const IconFullscreen = () => ( <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg> );
+const IconExitFullscreen = () => ( <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/></svg> );
 const IconVolume = ({ muted }) => muted ? (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z" /><line x1="23" y1="9" x2="17" y2="15" /><line x1="17" y1="9" x2="23" y2="15" /></svg>
 ) : (
@@ -51,6 +53,7 @@ export default function FocusModePage() {
     const [volume, setVolume]     = useState(0.7);
     const audioRef                = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
     const [quiz, setQuiz]         = useState(null);
     const [quizLoading, setQuizLoading] = useState(false);
     const [showQuiz, setShowQuiz] = useState(false);
@@ -113,8 +116,21 @@ export default function FocusModePage() {
     }, [volume]);
 
     useEffect(() => {
-        return () => { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); };
+        const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+        document.addEventListener('fullscreenchange', onFsChange);
+        return () => {
+            document.removeEventListener('fullscreenchange', onFsChange);
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+        };
     }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen().catch(() => {});
+        }
+    };
 
     useEffect(() => {
         if (phase !== 'PREPARING') return;
@@ -237,10 +253,19 @@ export default function FocusModePage() {
                     </div>
                 </div>
 
-                <button onClick={handleClose} className="flex items-center gap-2 text-neutral-500 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5">
-                    <span className="text-[10px] tracking-widest font-mono uppercase hidden sm:block">Finalizar</span>
-                    <IconClose />
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={toggleFullscreen}
+                        title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+                        className="text-neutral-500 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5"
+                    >
+                        {isFullscreen ? <IconExitFullscreen /> : <IconFullscreen />}
+                    </button>
+                    <button onClick={handleClose} className="flex items-center gap-2 text-neutral-500 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5">
+                        <span className="text-[10px] tracking-widest font-mono uppercase hidden sm:block">Finalizar</span>
+                        <IconClose />
+                    </button>
+                </div>
             </div>
 
             <div className="relative z-10 flex-1 flex flex-row min-h-0">
@@ -407,6 +432,7 @@ export default function FocusModePage() {
             />
 
             <QuizModal
+                key={quiz?.moduloId ?? 'quiz'}
                 isOpen={showQuiz}
                 onClose={() => { setShowQuiz(false); setQuiz(null); }}
                 cuestionario={quiz}

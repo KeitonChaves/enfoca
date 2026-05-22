@@ -37,6 +37,17 @@ public interface DailySummaryRepository extends JpaRepository<DailySummary, Long
         """)
     Integer sumTotalFocusedMinutesByUserId(@Param("userId") Long userId);
 
+    // Usuarios distintos activos en un rango (para job semanal)
+    @Query("""
+        SELECT DISTINCT ds.userId
+        FROM DailySummary ds
+        WHERE ds.summaryDate BETWEEN :from AND :to
+          AND ds.focusedMinutes > 0
+        """)
+    List<Long> findActiveUserIdsBetween(
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
+
     // Para heatmap mensual
     @Query("""
         SELECT ds FROM DailySummary ds

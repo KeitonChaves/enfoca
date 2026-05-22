@@ -12,6 +12,9 @@ import ResetPasswordPage from '../pages/ResetPasswordPage';
 import ProfilePage from '../pages/ProfilePage';
 import LibraryPage from '../pages/LibraryPage';
 import WeeklyCalendarPage from "../pages/WeeklyCalendarPage.jsx";
+import PlanDetailPage  from '../pages/PlanDetailPage';
+import ExamPage        from '../pages/ExamPage';
+import ExamResultPage  from '../pages/ExamResultPage';
 
 export const PUBLIC_ROUTES = [
     { path: '/',               element: LandingPage,        name: 'Inicio' },
@@ -29,8 +32,10 @@ export const PRIVATE_ROUTES = [
     { path: '/analytics',         element: AnalyticsPage,      name: 'Análisis' },
     { path: '/settings/password', element: ChangePasswordPage, name: 'Cambiar Contraseña' },
     { path: '/profile',           element: ProfilePage,        name: 'Mi Perfil' },
-    { path: '/calendar',          element: WeeklyCalendarPage, name: 'Calendario Semanal'}
-
+    { path: '/calendar',          element: WeeklyCalendarPage, name: 'Calendario Semanal'},
+    { path: '/plan-detail/:planId',         element: PlanDetailPage,  name: 'Detalle Plan' },
+    { path: '/examen/:examenId',            element: ExamPage,        name: 'Examen' },
+    { path: '/examen/:examenId/resultado',  element: ExamResultPage,  name: 'Resultado Examen' },
 ];
 
 export const FULLSCREEN_ROUTES = [

@@ -77,6 +77,27 @@ public class PlanEstudioController {
         return ResponseEntity.ok(servicio.obtenerCatalogo());
     }
 
+    @GetMapping("/en-revision")
+    public ResponseEntity<List<PlanEstudioResponse>> enRevision(
+            @RequestHeader("X-User-Id") String usuarioId) {
+        return ResponseEntity.ok(servicio.listarEnRevision(usuarioId));
+    }
+
+    @PostMapping("/{id}/clonar")
+    public ResponseEntity<PlanEstudioResponse> clonar(
+            @PathVariable UUID id,
+            @RequestHeader("X-User-Id") String usuarioId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(servicio.clonar(id, usuarioId));
+    }
+
+    @PostMapping("/{id}/feedback")
+    public ResponseEntity<PlanEstudioResponse> feedback(
+            @PathVariable UUID id,
+            @RequestHeader("X-User-Id") String usuarioId,
+            @Valid @RequestBody FeedbackRequest request) {
+        return ResponseEntity.ok(servicio.registrarFeedback(id, usuarioId, request));
+    }
+
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
         return ResponseEntity.ok("ai-service OK");

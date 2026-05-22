@@ -39,14 +39,16 @@ app:
   jwt:
     secret: ${JWT_SECRET}
 
-  # Conexión al pomodoro-service para leer sesiones
   pomodoro-service:
     url: ${POMODORO_SERVICE_URL:http://localhost:8084}
 
-  # Configuración de métricas
   metrics:
     streak-timezone: ${METRICS_TIMEZONE:America/Santiago}
-    weekly-insight-day: MONDAY   # día en que se regeneran los AI insights
+
+  groq:
+    api-key: ${GROQ_API_KEY}
+    url: ${GROQ_URL:https://api.groq.com/openai/v1/chat/completions}
+    modelo: ${GROQ_MODELO:llama-3.3-70b-versatile}
 
 logging:
   level:

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { planService } from '../services/api';
+import { planService, certService } from '../services/api';
 import { getPlanImage, getPlanBgFallback } from '../utils/planImage';
 
 
@@ -82,12 +82,6 @@ const CodeIcon = () => (
         <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
     </svg>
 );
-const FocusIcon = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M3 9V5h4M21 9V5h-4M3 15v4h4M21 15v4h-4"/>
-    </svg>
-);
 
 const getPlanProgress = (plan) => {
     if (!plan?.modulos) return plan?.progreso?.porcentaje ?? 0;
@@ -110,9 +104,13 @@ export default function StudyPlanPage() {
     const [misPlanes, setMisPlanes] = useState([]);
     const [planSeleccionado, setPlanSeleccionado] = useState(null);
     const [retentionIndex, setRetentionIndex] = useState(null);
+    const [certIds, setCertIds] = useState(new Set());
 
     useEffect(() => {
         planService.listar().then(r => setMisPlanes(r.data)).catch(() => {});
+        certService.certificados().then(r => {
+            setCertIds(new Set((r.data ?? []).map(c => c.planMaestroId)));
+        }).catch(() => {});
         if (location.state?.planSeleccionado) {
             setPlanSeleccionado(location.state.planSeleccionado);
             setStatus('generated');
@@ -295,16 +293,7 @@ export default function StudyPlanPage() {
                                     </svg>
                                     Iniciar
                                 </button>
-                                <button
-                                    onClick={() => navigate('/focus-mode', { state: { plan: planMostrado } })}
-                                    className="flex items-center gap-1.5 px-3 h-8 rounded-lg border border-neutral-700 hover:border-violet-500/40 hover:bg-violet-600/10 text-neutral-400 hover:text-violet-300 text-xs font-bold transition-all active:scale-95"
-                                    title="Iniciar sesión Deep Focus con este plan"
-                                >
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                                        <circle cx="12" cy="12" r="3"/><path d="M3 9V5h4M21 9V5h-4M3 15v4h4M21 15v4h-4"/>
-                                    </svg>
-                                    Deep Focus
-                                </button>
+
                                 <button
                                     onClick={() => handleEliminar(planMostrado.id)}
                                     disabled={!allTopicsCompleted}
@@ -441,7 +430,7 @@ export default function StudyPlanPage() {
                         {misPlanes.map((plan, idx) => (
                             <div
                                 key={plan.id}
-                                onClick={() => { setPlanSeleccionado(plan); setStatus('generated'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                onClick={() => navigate(`/plan-detail/${plan.id}`)}
                                 className={`group cursor-pointer text-left bg-[#111111] border rounded-xl overflow-hidden hover:border-neutral-700 transition-all hover:-translate-y-0.5 ${
                                     planMostrado?.id === plan.id ? 'border-violet-500/40' : 'border-neutral-800/60'
                                 }`}
@@ -461,6 +450,12 @@ export default function StudyPlanPage() {
                                         {getPlanProgress(plan) === 100 && (
                                             <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-emerald-500 text-white">
                                                 ✓ Completado
+                                            </span>
+                                        )}
+                                        {certIds.has(plan.originalPlanId ?? plan.id) && (
+                                            <span className="flex items-center gap-1 text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-amber-500 text-black">
+                                                <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+                                                Cert.
                                             </span>
                                         )}
                                     </div>

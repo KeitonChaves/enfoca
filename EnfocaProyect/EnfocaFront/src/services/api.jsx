@@ -66,6 +66,15 @@ export const planService = {
     registrarSesion:         (temaId)         => api.post(`/planes-estudio/temas/${temaId}/sesion-hoy`),
     eliminarProgramacion:    (temaId, fecha)  => api.delete(`/planes-estudio/temas/${temaId}/programacion/${fecha}`),
     generarCuestionario: (moduloId)      => api.post(`/planes-estudio/modulos/${moduloId}/cuestionario`),
+    clonar:              (id)            => api.post(`/planes-estudio/${id}/clonar`),
+    enRevision:          ()              => api.get('/planes-estudio/en-revision'),
+    feedback:            (id, data)      => api.post(`/planes-estudio/${id}/feedback`, data),
+};
+
+export const certService = {
+    iniciar:      (data)      => api.post('/certificacion/examenes/iniciar', data),
+    responder:    (id, data)  => api.post(`/certificacion/examenes/${id}/responder`, data),
+    certificados: ()          => api.get('/certificacion/certificados'),
 };
 
 export const metricsService = {

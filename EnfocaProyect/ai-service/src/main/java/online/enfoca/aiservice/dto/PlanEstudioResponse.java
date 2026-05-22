@@ -18,10 +18,17 @@ public record PlanEstudioResponse(
         int totalValidaciones,
         LocalDateTime creadoEn,
         String color,
+        boolean esComunitario,
+        boolean yaVoto,
+        UUID originalPlanId,
         List<ModuloResponse> modulos,
         ProgresoResponse progreso
 ) {
     public static PlanEstudioResponse desde(PlanEstudio plan) {
+        return desde(plan, null);
+    }
+
+    public static PlanEstudioResponse desde(PlanEstudio plan, String usuarioId) {
         List<ModuloResponse> modulos = plan.getModulos().stream()
                 .map(ModuloResponse::desde)
                 .toList();
@@ -38,6 +45,9 @@ public record PlanEstudioResponse(
                 totalTemas > 0 ? Math.round((double) temasCompletados / totalTemas * 100) : 0
         );
 
+        boolean yaVoto = usuarioId != null && plan.getValidaciones().stream()
+                .anyMatch(v -> usuarioId.equals(v.getUsuarioId()));
+
         return new PlanEstudioResponse(
                 plan.getId(),
                 plan.getTitulo(),
@@ -48,6 +58,9 @@ public record PlanEstudioResponse(
                 plan.getTotalValidaciones(),
                 plan.getCreadoEn(),
                 plan.getColor(),
+                "comunidad".equals(plan.getUsuarioId()),
+                yaVoto,
+                plan.getOriginalPlanId(),
                 modulos,
                 progreso
         );

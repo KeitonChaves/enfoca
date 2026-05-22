@@ -18,6 +18,10 @@ app:
     secret: dGhpcy1pcy1hLXZlcnktc2VjdXJlLXNlY3JldC1rZXktZm9yLWRldmVsb3BtZW50LW9ubHk=
   pomodoro-service:
     url: ${POMODORO_SERVICE_URL:http://localhost:8082}
+  groq:
+    api-key: ${GROQ_API_KEY:dummy-key-local}
+    url: https://api.groq.com/openai/v1/chat/completions
+    modelo: llama-3.3-70b-versatile
 
 eureka:
   client:

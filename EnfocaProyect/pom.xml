@@ -29,6 +29,7 @@
         <module>metrics-service</module>
         <module>pomodoro-service</module>
         <module>discovery-service</module>
+        <module>certification-service</module>
     </modules>
 
     <scm>

@@ -104,6 +104,26 @@ services:
       retries: 10
     restart: unless-stopped
 
+  certification-db:
+    image: postgres:15
+    container_name: certification-db
+    environment:
+      POSTGRES_DB: enfoca_certification
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+      TZ: America/Santiago
+      PGTZ: America/Santiago
+    ports:
+      - "5438:5432"
+    volumes:
+      - certification-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
+    restart: unless-stopped
+
   # ================================================================
   # MENSAJERÍA Y CACHÉ
   # ================================================================
@@ -282,6 +302,30 @@ services:
       TZ: America/Santiago
     restart: unless-stopped
 
+  certification-service:
+    build:
+      context: .
+      dockerfile: certification-service/Dockerfile
+    container_name: certification-service
+    ports:
+      - "8086:8086"
+    depends_on:
+      certification-db:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      CERT_DB_URL: jdbc:postgresql://certification-db:5432/enfoca_certification
+      CERT_DB_USERNAME: postgres
+      CERT_DB_PASSWORD: postgres
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: certification-service
+      EUREKA_INSTANCE_INSTANCEID: certification-service:8086
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      TZ: America/Santiago
+    restart: unless-stopped
+
   api-gateway:
     build:
       context: .
@@ -314,3 +358,4 @@ volumes:
   ai-db-data:
   gamification-db-data:
   metrics-db-data:
+  certification-db-data:

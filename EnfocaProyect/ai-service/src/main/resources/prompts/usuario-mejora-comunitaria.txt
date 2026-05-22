@@ -1,0 +1,10 @@
+Este plan recibió valoraciones negativas y múltiples reportes de la comunidad.
+
+PLAN ACTUAL:
+{plan_json}
+
+PROBLEMAS REPORTADOS POR LA COMUNIDAD:
+{feedbacks_resumen}
+
+Mejora el plan abordando todos los problemas reportados. Mantén el mismo título, objetivo
+y nivel. Devuelve SOLO el JSON con la misma estructura del plan original.

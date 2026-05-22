@@ -55,6 +55,10 @@ public class PlanEstudio {
     @Builder.Default
     private String color = "#8b5cf6";
 
+    // Apunta al plan "maestro" del que se clonó — null si es original
+    @Column(name = "original_plan_id")
+    private UUID originalPlanId;
+
     @CreationTimestamp
     @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn;

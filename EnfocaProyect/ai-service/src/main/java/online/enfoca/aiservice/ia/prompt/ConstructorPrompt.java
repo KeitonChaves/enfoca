@@ -24,6 +24,9 @@ public class ConstructorPrompt {
     private String plantillaPlan;
     private String sistemaMejora;
     private String plantillaMejora;
+    private String sistemaMejoraPersonal;
+    private String plantillaMejoraPersonal;
+    private String plantillaMejoraComunitaria;
     private String sistemaCuestionario;
     private String plantillaCuestionario;
 
@@ -33,12 +36,15 @@ public class ConstructorPrompt {
 
     @PostConstruct
     public void cargarPrompts() throws IOException {
-        this.sistemaPlan         = leer("classpath:prompts/sistema-generacion.txt");
-        this.plantillaPlan       = leer("classpath:prompts/usuario-generacion.txt");
-        this.sistemaMejora       = leer("classpath:prompts/sistema-mejora.txt");
-        this.plantillaMejora     = leer("classpath:prompts/usuario-mejora.txt");
-        this.sistemaCuestionario = leer("classpath:prompts/sistema-cuestionario.txt");
-        this.plantillaCuestionario = leer("classpath:prompts/usuario-cuestionario.txt");
+        this.sistemaPlan              = leer("classpath:prompts/sistema-generacion.txt");
+        this.plantillaPlan            = leer("classpath:prompts/usuario-generacion.txt");
+        this.sistemaMejora            = leer("classpath:prompts/sistema-mejora.txt");
+        this.plantillaMejora          = leer("classpath:prompts/usuario-mejora.txt");
+        this.sistemaMejoraPersonal    = leer("classpath:prompts/sistema-mejora-personal.txt");
+        this.plantillaMejoraPersonal  = leer("classpath:prompts/usuario-mejora-personal.txt");
+        this.plantillaMejoraComunitaria = leer("classpath:prompts/usuario-mejora-comunitaria.txt");
+        this.sistemaCuestionario      = leer("classpath:prompts/sistema-cuestionario.txt");
+        this.plantillaCuestionario    = leer("classpath:prompts/usuario-cuestionario.txt");
         log.info("Prompts de IA cargados desde resources/prompts/");
     }
 
@@ -54,6 +60,21 @@ public class ConstructorPrompt {
     public String[] promptMejora(PlanEstudio plan, String planJson) {
         String usuario = plantillaMejora
                 .replace("{plan_json}", planJson);
+        return new String[]{ sistemaMejora, usuario };
+    }
+
+    public String[] promptMejoraPersonal(String planJson, String motivo, String motivoLabel, String detalle) {
+        String usuario = plantillaMejoraPersonal
+                .replace("{plan_json}", planJson)
+                .replace("{motivo_label}", motivoLabel)
+                .replace("{detalle}", detalle != null && !detalle.isBlank() ? detalle : "Sin detalle adicional.");
+        return new String[]{ sistemaMejoraPersonal, usuario };
+    }
+
+    public String[] promptMejoraComunitaria(String planJson, String feedbacksResumen) {
+        String usuario = plantillaMejoraComunitaria
+                .replace("{plan_json}", planJson)
+                .replace("{feedbacks_resumen}", feedbacksResumen);
         return new String[]{ sistemaMejora, usuario };
     }
 

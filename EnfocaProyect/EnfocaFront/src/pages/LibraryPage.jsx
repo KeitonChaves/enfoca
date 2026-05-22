@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { planService } from '../services/api';
+import { planService, certService } from '../services/api';
 import { getPlanImage, getPlanBgFallback } from '../utils/planImage';
 
 const NIVEL_LABEL = { BASICO: 'Básico', INTERMEDIO: 'Intermedio', AVANZADO: 'Avanzado' };
@@ -25,7 +25,13 @@ const BookIcon = () => (
     </svg>
 );
 
-function PlanCard({ plan, index, onClick, badge, showProgress }) {
+const IconMedal = () => (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+    </svg>
+);
+
+function PlanCard({ plan, index, onClick, badge, showProgress, tieneCertificado }) {
     const progreso = showProgress ? (() => {
         const temas = plan.modulos?.flatMap(m => m.temas) ?? [];
         if (!temas.length) return 0;
@@ -62,6 +68,11 @@ function PlanCard({ plan, index, onClick, badge, showProgress }) {
                     {progreso === 100 && (
                         <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-emerald-600 text-white">
                             ✓
+                        </span>
+                    )}
+                    {tieneCertificado && (
+                        <span className="flex items-center gap-1 text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-amber-500 text-black">
+                            <IconMedal /> Certificado
                         </span>
                     )}
                 </div>
@@ -119,22 +130,31 @@ const SkeletonGrid = () => (
 
 export default function LibraryPage() {
     const navigate = useNavigate();
-    const [catalogo, setCatalogo] = useState([]);
-    const [misPlanes, setMisPlanes] = useState([]);
-    const [loading, setLoading]    = useState(true);
+    const [catalogo, setCatalogo]       = useState([]);
+    const [misPlanes, setMisPlanes]     = useState([]);
+    const [enRevision, setEnRevision]   = useState([]);
+    const [certIds, setCertIds]         = useState(new Set());
+    const [loading, setLoading]         = useState(true);
 
     useEffect(() => {
         Promise.all([
             planService.catalogo().then(r => r.data ?? []).catch(() => []),
             planService.listar().then(r => r.data ?? []).catch(() => []),
-        ]).then(([cat, mis]) => {
+            planService.enRevision().then(r => r.data ?? []).catch(() => []),
+            certService.certificados().then(r => r.data ?? []).catch(() => []),
+        ]).then(([cat, mis, rev, certs]) => {
             setCatalogo(cat);
             setMisPlanes(mis);
+            setEnRevision(rev);
+            // Conjunto de planMaestroId con certificado
+            setCertIds(new Set(certs.map(c => c.planMaestroId)));
         }).finally(() => setLoading(false));
     }, []);
 
-    const abrirPlan = (plan) =>
-        navigate('/study-plan', { state: { planSeleccionado: plan } });
+    const tieneCert = (plan) =>
+        certIds.has(plan.originalPlanId ?? plan.id);
+
+    const abrirPlan = (plan) => navigate(`/plan-detail/${plan.id}`);
 
     return (
         <div className="p-4 md:p-8 flex flex-col gap-10">
@@ -172,6 +192,30 @@ export default function LibraryPage() {
                 )}
             </section>
 
+            {/* ── Planes en Evaluación ── */}
+            {enRevision.length > 0 && (
+                <section className="flex flex-col gap-5">
+                    <div>
+                        <h2 className="text-xl font-bold text-white">Planes en Evaluación</h2>
+                        <p className="text-neutral-500 text-sm mt-1">
+                            Planes generados por la comunidad que aún necesitan valoraciones para entrar a la biblioteca.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {enRevision.map((plan, i) => (
+                            <PlanCard
+                                key={plan.id}
+                                plan={plan}
+                                index={i + 8}
+                                badge="En evaluación"
+                                showProgress={false}
+                                onClick={p => navigate(`/plan-detail/${p.id}`)}
+                            />
+                        ))}
+                    </div>
+                </section>
+            )}
+
             {/* ── Mis Planes ── */}
             {misPlanes.length > 0 && (
                 <section className="flex flex-col gap-5">
@@ -195,6 +239,7 @@ export default function LibraryPage() {
                                 plan={plan}
                                 index={i + 4}
                                 showProgress
+                                tieneCertificado={tieneCert(plan)}
                                 onClick={abrirPlan}
                             />
                         ))}

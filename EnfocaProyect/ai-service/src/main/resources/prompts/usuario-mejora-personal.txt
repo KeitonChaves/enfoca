@@ -1,0 +1,17 @@
+El usuario estudió este plan y reportó que no le funcionó correctamente.
+
+PLAN ACTUAL:
+{plan_json}
+
+PROBLEMA REPORTADO: {motivo_label}
+DETALLE DEL USUARIO: {detalle}
+
+INSTRUCCIONES SEGÚN EL PROBLEMA:
+- MUY_BASICO: Profundiza los temas, agrega subtemas avanzados, aumenta pomodoros estimados.
+- MUY_AVANZADO: Simplifica el lenguaje, agrega módulos introductorios, reduce la complejidad.
+- MAL_ESTRUCTURADO: Reordena los módulos en progresión lógica (simple → complejo), revisa dependencias entre temas.
+- MUY_EXTENSO: Consolida temas relacionados, elimina redundancias, reduce a lo esencial.
+- FUERA_DE_TEMA: Realinea todos los módulos y temas con el objetivo declarado del plan.
+- OTRO: Mejora el plan de forma general considerando el detalle del usuario.
+
+Mantén el mismo título, objetivo y nivel. Devuelve SOLO el JSON con la misma estructura.

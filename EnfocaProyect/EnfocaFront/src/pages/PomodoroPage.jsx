@@ -278,11 +278,11 @@ export default function PomodoroPage() {
             <div className="flex items-center justify-between border-b border-neutral-800 pb-2 mb-4">
                 <h1 className="text-[10px] font-mono text-neutral-400 tracking-widest uppercase">Active_Terminal</h1>
                 <div className="hidden md:flex items-center gap-4 text-[10px] font-mono tracking-widest uppercase">
-                    <span className="text-violet-400 cursor-pointer">Focus_Session</span>
                     <button
                         onClick={() => {
                             const ts = timerRef.current?.getTimerState() ?? {};
                             timerRef.current?.pause();
+                            document.documentElement.requestFullscreen().catch(() => {});
                             navigate('/focus-mode', {
                                 state: {
                                     plan,
@@ -449,6 +449,7 @@ export default function PomodoroPage() {
             </div>
 
             <QuizModal
+                key={quiz?.moduloId ?? 'quiz'}
                 isOpen={showQuiz}
                 onClose={() => { setShowQuiz(false); setQuiz(null); }}
                 cuestionario={quiz}

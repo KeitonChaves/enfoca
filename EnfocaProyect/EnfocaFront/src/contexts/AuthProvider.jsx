@@ -35,7 +35,6 @@ export const AuthProvider = ({children}) => {
     }, [isAuthenticated, user, cargarPerfil]);
 
     const login = async (credentials) => {
-        setLoading(true);
         try {
             const {data} = await authService.login(credentials);
             localStorage.setItem('access_token', data.access_token);
@@ -54,11 +53,9 @@ export const AuthProvider = ({children}) => {
         } catch (error) {
             return {
                 success: false,
-                error: error.response?.data?.message || 'Credenciales incorrectas',
+                error: error.response?.data?.message || error.response?.data?.mensaje || 'Credenciales incorrectas',
                 status: error.response?.status ?? 0,
             };
-        } finally {
-            setLoading(false);
         }
     };
 

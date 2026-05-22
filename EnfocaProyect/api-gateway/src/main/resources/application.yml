@@ -61,6 +61,7 @@ enfoca:
     - /oauth2/token
     - /planes-estudio/catalogo
     - /planes-estudio/ping
+    - /certificacion/verificar/**
     - /verify/**
     - /api-docs/**
     - /swagger-ui/**
@@ -88,7 +89,9 @@ resilience4j:
       study-plans-service:
         baseConfig: default
       certification-service:
-        baseConfig: default
+        slidingWindowSize: 5
+        failureRateThreshold: 60
+        waitDurationInOpenState: 30s
       weekly-analysis-service:
         baseConfig: default
       ai-service:
@@ -120,6 +123,8 @@ resilience4j:
     instances:
       ai-service:
         timeoutDuration: 15s
+      certification-service:
+        timeoutDuration: 60s
 
 management:
   endpoints:
